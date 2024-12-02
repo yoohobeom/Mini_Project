@@ -132,6 +132,8 @@
                 </div>
                 <button class="btn btn-success w-full">로그인</button>
             </form>
+	        <div class="divider">또는</div>
+	        <button class="btn btn-success w-full" onclick="location.href='${pageContext.request.contextPath}/usr/member/join'">회원가입</button>
         </div>
     </div>
 
