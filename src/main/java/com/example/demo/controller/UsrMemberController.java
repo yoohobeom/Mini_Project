@@ -54,7 +54,7 @@ public class UsrMemberController {
 		return "usr/member/realLogin";
 	}
 	
-	@PostMapping("/usr/member/doLogin")
+	@PostMapping("/usr/home/doLogin")
 	@ResponseBody
 	public String doLogin(HttpServletRequest req, String loginId, String loginPw) {
 		
