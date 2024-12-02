@@ -8,7 +8,7 @@ public class UsrHomeController {
 	
 	@GetMapping("/usr/home/main")
 	public String showMain() {
-		return "usr/home/main";
+		return "usr/home/testMain";
 	}
 	
 	@GetMapping("/")

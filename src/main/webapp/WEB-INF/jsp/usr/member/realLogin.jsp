@@ -85,8 +85,8 @@
 	themeInit();
 </script>
 
-<div class="flex items-center justify-center h-screen bg-gray-100">
-    <div class="p-6 bg-white rounded-lg shadow-lg w-96">
+<div class="flex items-center justify-center h-screen ">
+    <div class="p-6  rounded-lg shadow-lg w-96">
         <h2 class="text-2xl font-bold text-center mb-6">로그인
 	        <label class="swap swap-rotate">
 				  <!-- this hidden checkbox controls the state -->
