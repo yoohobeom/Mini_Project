@@ -25,7 +25,7 @@ public class UsrMemberController {
 	
 	@GetMapping("/usr/member/join")
 	public String join() {
-		return "usr/member/join";
+		return "usr/member/realJoin";
 	}
 	
 	@PostMapping("/usr/member/doJoin")

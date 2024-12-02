@@ -4,9 +4,29 @@
 
 <c:set var="pageTitle" value="로그인" />
 
-<%@ include file="/WEB-INF/jsp/common/header.jsp" %>
+<!DOCTYPE html>
+
+<html class= "max-h-full" data-theme="light">
+
+<head>
+<meta charset="UTF-8">
+<title>${pageTitle }</title>
+<!-- 테일윈드CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- 데이지 UI -->
+<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
+<!-- JQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<!-- 폰트어썸 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+<!-- common css -->
+<link rel="stylesheet" href="/resource/common.css" />
+</head>
+
+<body>
 
 <script>
+// 	공백 검증
 	const loginForm_onSubmit = function(form) {
 		form.loginId.value = form.loginId.value.trim();
 		form.loginPw.value = form.loginPw.value.trim();
@@ -25,6 +45,44 @@
 		
 		form.submit();
 	}
+	
+// 	테마변경
+	function themeApply(themeName) {
+		$('html').attr('data-theme', themeName);
+	}
+	
+	function themeSwap() {
+		const theme = localStorage.getItem("theme") ?? "light";
+		
+		let editorTheme = $('.toastui-editor-defaultUI');
+		
+		if (theme == "light") {
+			localStorage.setItem("theme", "dark");
+			editorTheme.addClass('toastui-editor-dark');
+		} else {
+			localStorage.setItem("theme", "light");
+			editorTheme.removeClass('toastui-editor-dark');
+		}
+		
+		themeApply(localStorage.getItem("theme"));
+	}
+	
+	function themeInit() {
+		
+		let swapCheck = $('#swapCheck');
+		
+		const theme = localStorage.getItem("theme") ?? "light";
+		
+		if (theme == "light") {
+			swapCheck.prop('checked', true);
+		} else {
+			swapCheck.prop('checked', false);
+		}
+		
+		themeApply(theme);
+	}
+	
+	themeInit();
 </script>
 
 <div class="flex items-center justify-center h-screen bg-gray-100">
@@ -70,7 +128,7 @@
             <button class="btn btn-success w-full">로그인</button>
         </form>
         <div class="divider">또는</div>
-        <button class="btn btn-success w-full">회원가입</button>
+        <button class="btn btn-success w-full" onclick="location.href='${pageContext.request.contextPath}/usr/member/join'">회원가입</button>
     </div>
 </div>
 <%@ include file="/WEB-INF/jsp/common/footer.jsp" %>
