@@ -15,5 +15,4 @@ public class UsrHomeController {
 	public String showRoot() {
 		return "redirect:/usr/home/main";
 	}
-	
 }
