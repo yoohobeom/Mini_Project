@@ -1,0 +1,32 @@
+@charset "UTF-8";
+
+.fc-day-sun .fc-col-header-cell-cushion {
+	color: red;
+}
+
+.fc-day-sat .fc-col-header-cell-cushion {
+	color: blue;
+}
+	    	
+.fc-daygrid-day .fc-daygrid-day-number {	/* 일요일, 토요일 제외 */
+	color: black;
+}
+	    	
+.fc-daygrid-day.fc-day-sun .fc-daygrid-day-number{ 		
+	color: red;
+}
+
+.fc-daygrid-day.fc-day-sat .fc-daygrid-day-number{		
+	color: blue;
+}
+
+.fc-toolbar-chunk {
+    display: flex;      /* 일렬로 나란히 */
+    align-items: center; /* 수직 가운데 정렬 */
+}
+
+#calendar {
+    width: 100% !important; /* 캘린더의 너비를 100%로 강제 설정 */
+    max-width: 800px !important; /* 최대 너비를 800px로 강제 설정 */
+    height: 500px !important; /* 높이를 500px로 강제 설정 */
+}

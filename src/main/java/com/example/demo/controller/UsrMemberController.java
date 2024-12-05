@@ -49,9 +49,9 @@ public class UsrMemberController {
 		return ResultData.from("S-1", String.format("[ %s ]은(는) 사용가능한 아이디입니다", loginId));
 	}
 	
-	@GetMapping("/usr/member/login")
-	public String login() {
-		return "usr/member/realLogin";
+	@GetMapping("/usr/usr/main")
+	public String usrMain() {
+		return "usr/usr/main";
 	}
 	
 	@PostMapping("/usr/home/doLogin")
@@ -72,7 +72,7 @@ public class UsrMemberController {
 		
 		rq.login(member.getId());
 		
-		return Util.jsReturn(String.format("%s님 환영합니다", member.getName()), "/");
+		return Util.jsReturn(String.format("%s님 환영합니다", member.getName()), "/usr/usr/main");
 	}
 	
 	@GetMapping("/usr/member/myPage")
