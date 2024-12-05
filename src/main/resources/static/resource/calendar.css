@@ -25,8 +25,12 @@
     align-items: center; /* 수직 가운데 정렬 */
 }
 
+#calendar-container {
+	width: 100%;        /* 부모 컨테이너의 너비를 100%로 설정하여 화면에 꽉 차도록 */
+	max-width: 100%;    /* 화면 전체 너비에 맞추기 */
+	margin: 0 auto;     /* 중앙 정렬 */	
+}
+  
 #calendar {
-    width: 100% !important; /* 캘린더의 너비를 100%로 강제 설정 */
-    max-width: 800px !important; /* 최대 너비를 800px로 강제 설정 */
-    height: 500px !important; /* 높이를 500px로 강제 설정 */
+	width: 100%;        /* 캘린더 자체도 부모 요소에 맞게 100% 너비 */
 }
