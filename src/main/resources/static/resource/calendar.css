@@ -39,11 +39,11 @@
 	position: absolute;
 	top: 0;
 	right: 0;
-	width: 50%;
-	max-width: 1000px;
-	height: 80vh;
+	width: 100%;
+	max-width: 1200px;
+	height: 64vh;
 	padding: 10px;
 	overflow-y: auto;
 	border-left: 1px solid #ccc;
-	background-color: #f9f9f9;
+/* 	background-color: #f9f9f9; */
 }
