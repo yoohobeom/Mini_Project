@@ -21,16 +21,26 @@
 }
 
 .fc-toolbar-chunk {
-    display: flex;      /* 일렬로 나란히 */
+    display: flex;       /* 툴바의 요소들을 일렬로 나란히 배치 */
     align-items: center; /* 수직 가운데 정렬 */
+    justify-content: flex-start; /* 왼쪽 정렬 */
 }
 
-#calendar-container {
-	width: 100%;        /* 부모 컨테이너의 너비를 100%로 설정하여 화면에 꽉 차도록 */
-	max-width: 100%;    /* 화면 전체 너비에 맞추기 */
-	margin: 0 auto;     /* 중앙 정렬 */	
-}
-  
 #calendar {
-	width: 100%;        /* 캘린더 자체도 부모 요소에 맞게 100% 너비 */
+	width: 100% !important; /* 캘린더의 너비를 100%로 강제 설정 */
+    max-width: 800px !important; /* 최대 너비를 800px로 강제 설정 */
+    height: 500px !important; /* 높이를 500px로 강제 설정 */
+}
+
+#schedule-details {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 50%;
+	max-width: 1000px;
+	height: 80vh;
+	padding: 10px;
+	overflow-y: auto;
+	border-left: 1px solid #ccc;
+	background-color: #f9f9f9;
 }
