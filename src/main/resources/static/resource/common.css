@@ -12,6 +12,14 @@ html * {
 	text-underline-position: under;
 }
 
+
+html, body {
+	margin: 0;
+	padding: 0;
+	overflow-x: hidden; /* 가로 스크롤 제거 */
+	width: 100%; /* 화면 너비 고정 */
+}
+    
 .perspective {
 	perspective: 1000px;
 }
