@@ -50,40 +50,6 @@ public class UsrArticleController {
 		return Util.jsReturn(String.format("%d번 게시물을 작성했습니다", id), String.format("detail?id=%d", id));
 	}
 
-	@GetMapping("/usr/article/list")
-	public String showList(Model model, int boardId, @RequestParam(defaultValue = "1") int cPage,
-			@RequestParam(defaultValue = "title") String searchType,
-			@RequestParam(defaultValue = "") String searchKeyword) {
-		
-		Board board = articleService.getBoardById(boardId);
-
-		int limitFrom = (cPage - 1) * 10;
-
-		List<Article> articles = articleService.getArticles(boardId, limitFrom, searchType, searchKeyword);
-		int articlesCnt = articleService.getArticlesCnt(boardId, searchType, searchKeyword);
-
-		int totalPagesCnt = (int) Math.ceil((double) articlesCnt / 10);
-
-		int from = ((cPage - 1) / 10) * 10 + 1;
-		int end = (((cPage - 1) / 10) + 1) * 10;
-
-		if (end > totalPagesCnt) {
-			end = totalPagesCnt;
-		}
-
-		model.addAttribute("board", board);
-		model.addAttribute("articles", articles);
-		model.addAttribute("articlesCnt", articlesCnt);
-		model.addAttribute("totalPagesCnt", totalPagesCnt);
-		model.addAttribute("from", from);
-		model.addAttribute("end", end);
-		model.addAttribute("cPage", cPage);
-		model.addAttribute("searchType", searchType);
-		model.addAttribute("searchKeyword", searchKeyword);
-
-		return "usr/article/list";
-	}
-
 	@GetMapping("/usr/article/detail")
 	public String showDetail(HttpServletRequest req, HttpServletResponse resp, Model model, int id) {
 

@@ -1,14 +1,20 @@
 package com.example.demo.controller;
 
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.demo.dto.Article;
+import com.example.demo.dto.Board;
 import com.example.demo.dto.Member;
 import com.example.demo.dto.ResultData;
 import com.example.demo.dto.Rq;
+import com.example.demo.service.ArticleService;
 import com.example.demo.service.MemberService;
 import com.example.demo.util.Util;
 
@@ -18,9 +24,11 @@ import jakarta.servlet.http.HttpServletRequest;
 public class UsrMemberController {
 	
 	private MemberService memberService;
+	private ArticleService articleService;
 	
-	public UsrMemberController(MemberService memberService) {
+	public UsrMemberController(MemberService memberService, ArticleService articleService) {
 		this.memberService = memberService;
+		this.articleService = articleService;
 	}
 	
 	@GetMapping("/usr/member/join")
@@ -49,9 +57,48 @@ public class UsrMemberController {
 		return ResultData.from("S-1", String.format("[ %s ]은(는) 사용가능한 아이디입니다", loginId));
 	}
 	
-	@GetMapping("/usr/usr/main")
-	public String usrMain() {
-		return "usr/usr/main";
+	@GetMapping("/usr/member/mainPage")
+	public String showMain(
+	        @RequestParam(defaultValue = "0") int boardId, // 기본값 0으로 전체 게시글 조회
+	        @RequestParam(defaultValue = "1") int cPage,
+	        @RequestParam(defaultValue = "title") String searchType,
+	        @RequestParam(defaultValue = "") String searchKeyword,
+	        Model model) {
+
+	    int limitFrom = (cPage - 1) * 10;
+
+	    List<Article> articles;
+	    int articlesCnt;
+
+	    if (boardId == 0) { // 전체 게시글 조회
+	        articles = articleService.getArticlesWithoutBoardId(limitFrom, searchType, searchKeyword);
+	        articlesCnt = articleService.getArticlesCntWithoutBoardId(searchType, searchKeyword);
+	        model.addAttribute("board", null);
+	    } else { // 특정 게시판 게시글 조회
+	        Board board = articleService.getBoardById(boardId);
+	        articles = articleService.getArticles(boardId, limitFrom, searchType, searchKeyword);
+	        articlesCnt = articleService.getArticlesCnt(boardId, searchType, searchKeyword);
+	        model.addAttribute("board", board);
+	    }
+
+	    int totalPagesCnt = (int) Math.ceil((double) articlesCnt / 10);
+	    int from = ((cPage - 1) / 10) * 10 + 1;
+	    int end = (((cPage - 1) / 10) + 1) * 10;
+
+	    if (end > totalPagesCnt) {
+	        end = totalPagesCnt;
+	    }
+
+	    model.addAttribute("articles", articles);
+	    model.addAttribute("articlesCnt", articlesCnt);
+	    model.addAttribute("totalPagesCnt", totalPagesCnt);
+	    model.addAttribute("from", from);
+	    model.addAttribute("end", end);
+	    model.addAttribute("cPage", cPage);
+	    model.addAttribute("searchType", searchType);
+	    model.addAttribute("searchKeyword", searchKeyword);
+		
+		return "usr/member/mainPage";
 	}
 	
 	@PostMapping("/usr/home/doLogin")
@@ -72,7 +119,7 @@ public class UsrMemberController {
 		
 		rq.login(member.getId());
 		
-		return Util.jsReturn(String.format("%s님 환영합니다", member.getName()), "/usr/usr/main");
+		return Util.jsReturn(String.format("%s님 환영합니다", member.getName()), "/usr/member/mainPage");
 	}
 	
 	@GetMapping("/usr/member/myPage")

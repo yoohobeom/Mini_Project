@@ -4,7 +4,6 @@
 
 <html>
 <head>
-
 <!-- fullcalendar -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <!-- 테일윈드CSS -->
@@ -24,6 +23,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var calendarEl = document.getElementById("calendar");
+        var scheduleDetails = document.getElementById("schedule-details");
         var calendar = new FullCalendar.Calendar(calendarEl, {
             locale: 'ko',
             headerToolbar: {
@@ -65,7 +65,17 @@
             }
         });
         calendar.render();
+        
+    	// 화면 클릭 시 일정 창 닫기
+	    document.addEventListener("click", function(event) {
+	        var target = event.target;
+	        if (!scheduleDetails.contains(target) && !calendarEl.contains(target)) {
+	            scheduleDetails.classList.add("hidden");
+	        }
+	    });
     });
+    
+    // 스케줄 하루 일정 불러오기
     function loadScheduleDetails(dateStr) {
         $.ajax({
             url: '/api/events/search',
@@ -73,20 +83,22 @@
             data: { start: dateStr, end: dateStr },
             success: function(data) {
                 var scheduleDetails = document.getElementById('schedule-details');
-                scheduleDetails.innerHTML = '';
+                var scheduleContent = document.getElementById('schedule-content');
+                scheduleDetails.classList.remove('hidden');
+                scheduleContent.innerHTML = '';
                 if (data.length > 0) {
                     data.forEach(function(event) {
                         var eventItem = document.createElement('div');
                         eventItem.className = 'event-item';
                         eventItem.innerHTML = '<h4>' + event.title + '</h4><p>' + event.start + '</p>';
-                        scheduleDetails.appendChild(eventItem);
+                        scheduleContent.appendChild(eventItem);
                     });
                 } else {
-                    scheduleDetails.innerHTML = '<p>No events for this date.</p>';
+                    scheduleContent.innerHTML = '<p>선택한 날짜에 일정이 없습니다.</p>';
                 }
             },
             error: function() {
-                alert('Failed to load events for the selected date.');
+                alert('일정을 불러오는 데 실패했습니다.');
             }
         });
     }
@@ -173,105 +185,70 @@
 		</ul>
 	</div>
 
-    <div id="calendar-container" class="ml-44 p-4">
-        <div id="calendar"></div>
-    </div>
-    <div id="schedule-details">
-        <p>Please select a date to view its schedule.</p>
-    </div>
+<!-- 캘린더 -->
+<div id="calendar-container" class="ml-44 p-4">
+    <div id="calendar"></div>
+</div>
 
-	<section class="mt-8">
-	<div class="container mx-auto">
-		<div class="w-9/12 mx-auto mb-2 pl-3 text-sm flex justify-between items-end">
-			<div>총 : ${articlesCnt }개</div>
-			<form>
-				<input type="hidden" name="boardId" value="${board.getId() }" />
-				<div class="flex">
-					<select class="select select-bordered select-sm mr-2" name="searchType">
-						<option value="title" <c:if test="${searchType == 'title' }">selected="selected"</c:if>>제목</option>
-						<option value="body" <c:if test="${searchType == 'body' }">selected="selected"</c:if>>내용</option>
-						<option value="title,body" <c:if test="${searchType == 'title,body' }">selected="selected"</c:if>>제목 + 내용</option>
-					</select>
-					
-					<label class="input input-bordered input-sm flex items-center gap-2 w-60">
-					  <input type="text" class="grow" name="searchKeyword" placeholder="검색어를 입력해주세요" maxlength="25" value="${searchKeyword }"/>
-					  <svg
-					    xmlns="http://www.w3.org/2000/svg"
-					    viewBox="0 0 16 16"
-					    fill="currentColor"
-					    class="h-4 w-4 opacity-70">
-					    <path
-					      fill-rule="evenodd"
-					      d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
-					      clip-rule="evenodd" />
-					  </svg>
-					</label>
-					
-					<button class="hidden">검색</button>
-				</div>
-			</form>
-		</div>
-		<div class="w-9/12 mx-auto">
-			<table class="table table-lg">
-				<colgroup>
-					<col width="60" />
-					<col />
-					<col width="60" />
-					<col width="200" />
-					<col width="40"/>
-					<col width="40"/>
-				</colgroup>
-				<thead>
-					<tr>
-						<th>번호</th>
-						<th>제목</th>
-						<th>작성자</th>
-						<th>작성일</th>
-						<th>조회수</th>
-						<th>추천수</th>
-					</tr>
-				</thead>
-				<tbody>
-					<c:forEach var="article" items="${articles }">
-						<tr class="hover">
-							<td>${article.getId() }</td>
-							<td class="link link-hover"><a href="detail?id=${article.getId() }">${article.getTitle() }</a></td>
-							<td>${article.getLoginId() }</td>
-							<td>${article.getRegDate().substring(2,16) }</td>
-							<td>${article.getViews() }</td>
-							<td>${article.getLike() }</td>
-						</tr>
-					</c:forEach>
-				</tbody>
-			</table>
-		</div>
-		
-		<c:if test="${rq.getLoginedMemberId() != -1 }">
-			<div class="w-9/12 mx-auto flex justify-end my-3">
-				<a class="btn btn-active btn-sm" href="write">글쓰기</a>
-			</div>
-		</c:if>
-		
-		<div class="mt-2 flex justify-center">
-			<div class="join">
-				<c:set var="path" value="?boardId=${board.getId() }&searchType=${searchType }&searchKeyword=${searchKeyword }" />
-			
-				<c:if test="${from != 1 }">
-					<a class="join-item btn btn-sm" href="${path }&cPage=1"><i class="fa-solid fa-angles-left"></i></a>
-					<a class="join-item btn btn-sm" href="${path }&cPage=${from - 1 }"><i class="fa-solid fa-angle-left"></i></a>
-				</c:if>
-				
-				<c:forEach var="i" begin="${from }" end="${end }">
-					<a class="join-item btn btn-sm ${cPage == i ? 'btn-active' : '' }" href="${path }&cPage=${i }">${i }</a>
-				</c:forEach>
-				
-				<c:if test="${end != totalPagesCnt }">
-					<a class="join-item btn btn-sm" href="${path }&cPage=${end + 1 }"><i class="fa-solid fa-angle-right"></i></a>
-					<a class="join-item btn btn-sm" href="${path }&cPage=${totalPagesCnt }"><i class="fa-solid fa-angles-right"></i></a>
-				</c:if>
-			</div>
-		</div>
-	</div>
+<!-- 일정 상세 정보 -->
+<div id="schedule-details" class="hidden p-4 ml-44 bg-gray-100 border border-gray-300 rounded">
+    <h3 class="text-lg font-bold mb-2">선택한 날짜의 일정</h3>
+    <div id="schedule-content">
+        <p>날짜를 선택하여 일정을 확인하세요.</p>
+    </div>
+</div>
+
+<!-- 게시글 리스트 -->
+<section class="mt-8">
+    <div class="container mx-auto">
+        <div class="w-9/12 mx-auto mb-2 pl-3 text-sm flex justify-between items-end">
+            <div>총 : ${articlesCnt}개</div>
+            <form>
+                <input type="hidden" name="boardId" value="${board.getId()}" />
+                <div class="flex">
+                    <select class="select select-bordered select-sm mr-2" name="searchType">
+                        <option value="title" <c:if test="${searchType == 'title'}">selected="selected"</c:if>>제목</option>
+                        <option value="body" <c:if test="${searchType == 'body'}">selected="selected"</c:if>>내용</option>
+                        <option value="title,body" <c:if test="${searchType == 'title,body'}">selected="selected"</c:if>>제목 + 내용</option>
+                    </select>
+
+                    <label class="input input-bordered input-sm flex items-center gap-2 w-60">
+                        <input type="text" class="grow" name="searchKeyword" placeholder="검색어를 입력해주세요" maxlength="25" value="${searchKeyword}" />
+                    </label>
+
+                    <button class="hidden">검색</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 게시글 테이블 -->
+        <div class="w-9/12 mx-auto">
+            <table class="table table-lg">
+                <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>제목</th>
+                        <th>작성자</th>
+                        <th>작성일</th>
+                        <th>조회수</th>
+                        <th>추천수</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="article" items="${articles}">
+                        <tr>
+                            <td>${article.id}</td>
+                            <td><a href="detail?id=${article.id}">${article.title}</a></td>
+                            <td>${article.loginId}</td>
+                            <td>${article.regDate.substring(0, 10)}</td>
+                            <td>${article.views}</td>
+                            <td>${article.like}</td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </section>
 </body>
 </html>

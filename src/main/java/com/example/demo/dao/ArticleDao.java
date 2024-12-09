@@ -36,7 +36,7 @@ public interface ArticleDao {
 				LEFT JOIN likePoint AS l
 				ON l.relTypeCode = 'article'
 				AND l.relId = a.id
-				WHERE a.boardId = #{boardId}
+				WHERE boardId = #{boardId}
 				<if test="searchKeyword != ''">
 					<choose>
 						<when test="searchType == 'title'">
@@ -59,6 +59,41 @@ public interface ArticleDao {
 			</script>
 			""")
 	public List<Article> getArticles(int boardId, int limitFrom, String searchType, String searchKeyword);
+	
+	@Select("""
+	        <script>
+	        SELECT a.*
+	             , m.loginId
+	             , IFNULL(SUM(l.point), 0) AS `like`
+	          FROM article AS a
+	          INNER JOIN `member` AS m
+	          ON a.memberId = m.id
+	          LEFT JOIN likePoint AS l
+	          ON l.relTypeCode = 'article'
+	          AND l.relId = a.id
+	          <if test="searchKeyword != ''">
+	              <choose>
+	                  <when test="searchType == 'title'">
+	                      WHERE a.title LIKE CONCAT('%', #{searchKeyword}, '%')
+	                  </when>
+	                  <when test="searchType == 'body'">
+	                      WHERE a.body LIKE CONCAT('%', #{searchKeyword}, '%')
+	                  </when>
+	                  <otherwise>
+	                      WHERE (
+	                          a.title LIKE CONCAT('%', #{searchKeyword}, '%')
+	                          OR a.body LIKE CONCAT('%', #{searchKeyword}, '%')
+	                      )
+	                  </otherwise>
+	              </choose>
+	          </if>
+	          GROUP BY a.id
+	          ORDER BY a.id DESC
+	          LIMIT #{limitFrom}, 10
+	        </script>
+	        """)
+	List<Article> getArticlesWithoutBoardId(int limitFrom, String searchType, String searchKeyword);
+
 
 	@Select("""
 			SELECT a.*
@@ -121,6 +156,31 @@ public interface ArticleDao {
 			</script>
 			""")
 	public int getArticlesCnt(int boardId, String searchType, String searchKeyword);
+	
+	@Select("""
+	        <script>
+	        SELECT COUNT(id)
+	          FROM article
+	          <if test="searchKeyword != ''">
+	              <choose>
+	                  <when test="searchType == 'title'">
+	                      WHERE title LIKE CONCAT('%', #{searchKeyword}, '%')
+	                  </when>
+	                  <when test="searchType == 'body'">
+	                      WHERE body LIKE CONCAT('%', #{searchKeyword}, '%')
+	                  </when>
+	                  <otherwise>
+	                      WHERE (
+	                          title LIKE CONCAT('%', #{searchKeyword}, '%')
+	                          OR body LIKE CONCAT('%', #{searchKeyword}, '%')
+	                      )
+	                  </otherwise>
+	              </choose>
+	          </if>
+	        </script>
+	        """)
+	int getArticlesCntWithoutBoardId(String searchType, String searchKeyword);
+
 
 	@Update("""
 			UPDATE article

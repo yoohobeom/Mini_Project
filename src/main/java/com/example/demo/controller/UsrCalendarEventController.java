@@ -62,7 +62,7 @@ public class UsrCalendarEventController {
     }
 
     // 특정 날짜의 이벤트 조회 (FullCalendar에서 날짜 클릭 시 스케줄을 표시하기 위함)
-    @GetMapping("/search")
+    @GetMapping("/api/events/search")
     @ResponseBody
     public List<CalendarEvent> searchEvents(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String start,
                                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String end) {

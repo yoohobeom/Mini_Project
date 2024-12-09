@@ -25,6 +25,10 @@ public class ArticleService {
 	public List<Article> getArticles(int boardId, int limitFrom, String searchType, String searchKeyword) {
 		return articleDao.getArticles(boardId, limitFrom, searchType, searchKeyword);
 	}
+	
+    public List<Article> getArticlesWithoutBoardId(int limitFrom, String searchType, String searchKeyword) {
+        return articleDao.getArticlesWithoutBoardId(limitFrom, searchType, searchKeyword);
+    }
 
 	public Article getArticleById(int id) {
 		return articleDao.getArticleById(id);
@@ -49,6 +53,10 @@ public class ArticleService {
 	public int getArticlesCnt(int boardId, String searchType, String searchKeyword) {
 		return articleDao.getArticlesCnt(boardId, searchType, searchKeyword);
 	}
+	
+    public int getArticlesCntWithoutBoardId(String searchType, String searchKeyword) {
+        return articleDao.getArticlesCntWithoutBoardId(searchType, searchKeyword);
+    }
 
 	public void increaseViews(int id) {
 		articleDao.increaseViews(id);
