@@ -37,6 +37,15 @@
             aspectRatio: 1.5, // 가로 세로 비율을 조정
             selectable: true, // 날짜 선택가능
 //             navLinks: true, // 달력 일자 선택가능
+			select: function(info) {
+                if (info.startStr === info.endStr) {
+                    // 단일 날짜를 선택한 경우
+                    loadScheduleDetails(info.startStr, info.startStr);
+                } else {
+                    // 여러 날짜를 선택한 경우
+                    loadScheduleDetails(info.startStr, info.endStr);
+                }
+			},
             validRange: {
                 start: function(currentDate) {
                     // 현재 날짜의 첫 번째 날을 범위의 시작으로 설정
@@ -60,10 +69,8 @@
                     }
                 });
             },
-            dateClick: function(info) {
-                loadScheduleDetails(info.dateStr);
-            }
         });
+        
         calendar.render();
         
     	// 화면 클릭 시 일정 창 닫기
@@ -75,12 +82,12 @@
 	    });
     });
     
-    // 스케줄 하루 일정 불러오기
-    function loadScheduleDetails(dateStr) {
-        $.ajax({
-            url: '/api/events/search',
+    // 스케줄 일정 불러오기
+	function loadScheduleDetails(startDate, endDate) {
+		$.ajax({
+			url: '/api/events/search',
             method: 'GET',
-            data: { start: dateStr, end: dateStr },
+            data: { start: startDate, end: endDate },
             success: function(data) {
                 var scheduleDetails = document.getElementById('schedule-details');
                 var scheduleContent = document.getElementById('schedule-content');
