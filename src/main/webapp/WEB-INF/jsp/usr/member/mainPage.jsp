@@ -47,11 +47,15 @@
 
         const calendar = new FullCalendar.Calendar(calendarEl, {
             locale: 'ko',
-            headerToolbar: { right: 'today', center: 'prev title next', left: 'title' },
+            headerToolbar: { right: 'today', center: 'prev title next', left: '' },
             initialView: "dayGridMonth",
             height: '500px',
             selectable: true,
             editable: true,
+            dayMaxEvents: true, // 일정 요약 활성화
+            eventDisplay: 'block', // 블록 스타일로 표시
+            moreLinkClick: 'popover', // 클릭 시 popover로 표시
+            morePopoverContent: true, // popover 내용 표시
             events: fetchEvents,
             eventClick: displayEventDetails,
             select: handleDateSelect
