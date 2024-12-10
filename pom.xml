@@ -94,6 +94,12 @@
 	        <groupId>org.glassfish.web</groupId>
 	        <artifactId>jakarta.servlet.jsp.jstl</artifactId>
 	    </dependency>
+	    
+<!--	    웹소켓-->
+	    <dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

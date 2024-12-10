@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -18,19 +18,20 @@ import com.example.demo.dto.CalendarEvent;
 import com.example.demo.service.CalendarEventsService;
 
 @Controller
+@RequestMapping("/api/events")
 public class UsrCalendarEventController {
 
     @Autowired
     private CalendarEventsService calendarEventsService;
 
-    // 모든 이벤트 조회 (FullCalendar에 이벤트를 제공하기 위한 형식)
+    // 모든 이벤트 조회
     @GetMapping("/all")
     @ResponseBody
     public List<CalendarEvent> getAllEvents() {
         return calendarEventsService.getAllEvents();
     }
 
-    // 새로운 이벤트 추가 (FullCalendar에서 사용자가 직접 추가)
+    // 새로운 이벤트 추가
     @PostMapping("/add")
     @ResponseBody
     public String addEvent(@RequestBody CalendarEvent event) {
@@ -38,7 +39,7 @@ public class UsrCalendarEventController {
         return "Event added successfully";
     }
 
-    // ID로 이벤트 조회
+    // 특정 ID로 이벤트 조회
     @GetMapping("/{id}")
     @ResponseBody
     public CalendarEvent getEventById(@PathVariable int id) {
@@ -61,19 +62,13 @@ public class UsrCalendarEventController {
         return "Event deleted successfully";
     }
 
-    // 특정 날짜의 이벤트 조회 (FullCalendar에서 날짜 클릭 시 스케줄을 표시하기 위함)
-    @GetMapping("/api/events/search")
+    // 특정 날짜 범위로 이벤트 검색
+    @GetMapping("/search")
     @ResponseBody
-    public List<CalendarEvent> searchEvents(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String start,
-                                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String end) {
+    public List<CalendarEvent> searchEvents(
+            @RequestParam String start,
+            @RequestParam String end) {
         return calendarEventsService.searchEvents(start, end);
-    }
-
-    // 특정 날짜 클릭 시 추가 정보를 제공하기 위한 메서드
-    @GetMapping("/details")
-    @ResponseBody
-    public List<CalendarEvent> getEventDetails(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String date) {
-        return calendarEventsService.searchEvents(date, date);
     }
 }
 

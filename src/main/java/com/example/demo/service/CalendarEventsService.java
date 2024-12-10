@@ -15,7 +15,7 @@ public class CalendarEventsService {
     @Autowired
     private CalendarEventsDao calendarEventsDao;
 
-    // 새로운 이벤트 추가
+    // 이벤트 추가
     public void addEvent(CalendarEvent event) {
         calendarEventsDao.addEvent(event);
     }
@@ -40,13 +40,7 @@ public class CalendarEventsService {
         calendarEventsDao.deleteEvent(id);
     }
 
-    // 필터를 기반으로 이벤트 검색 (현재는 placeholder)
-    public List<CalendarEvent> searchEvents(String title, String start, String end, String category, String status) {
-        // 제공된 필터를 기반으로 커스텀 로직을 구현가능
-        return calendarEventsDao.getAllEvents(); // Placeholder: 현재는 모든 이벤트 반환
-    }
-    
-    // 특정 날짜의 이벤트 검색
+    // 특정 날짜 범위로 이벤트 검색
     public List<CalendarEvent> searchEvents(String start, String end) {
         return calendarEventsDao.searchEvents(start, end);
     }
