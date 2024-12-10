@@ -23,11 +23,74 @@
 <title>유저 메인</title>
 
     <script>
+    
+    function initShareFeature() {
+        const shareButton = document.getElementById("share-button");
+        const shareModal = document.getElementById("share-modal");
+        const closeShareButton = document.getElementById("close-share");
+        const confirmShareButton = document.getElementById("confirm-share");
+
+        // 공유 버튼 클릭 시 모달 표시
+        shareButton.addEventListener("click", function () {
+            shareModal.classList.remove("hidden");
+        });
+
+        // 모달 닫기
+        closeShareButton.addEventListener("click", function () {
+            shareModal.classList.add("hidden");
+        });
+
+        // 공유하기 버튼 클릭 시 처리
+        confirmShareButton.addEventListener("click", function () {
+            const eventTitle = document.getElementById("event-title").value;
+            const shareUser = document.getElementById("share-user").value;
+            const permission = document.getElementById("share-permission").value;
+
+            if (!shareUser) {
+                alert("공유 대상을 입력해주세요.");
+                return;
+            }
+
+            // WebSocket을 통해 공유 요청 전송
+            sendShareEvent({
+                action: "share",
+                eventTitle: eventTitle,
+                sharedWith: shareUser,
+                permission: permission,
+            });
+
+            alert(`"${eventTitle}" 일정이 ${shareUser}에게 공유되었습니다.`);
+            shareModal.classList.add("hidden");
+        });
+    }
+    
+ // WebSocket으로 공유 이벤트 전송
+    function sendShareEvent(shareData) {
+        const socket = new SockJS("/ws"); // WebSocket 연결
+        const stompClient = StompJs.Stomp.over(socket); // Stomp 클라이언트 생성
+
+        // WebSocket 연결 및 메시지 전송
+        stompClient.connect({}, function () {
+            console.log("WebSocket Connected");
+
+            stompClient.send(
+                "/app/share-event", // 서버의 WebSocket 핸들러
+                {},
+                JSON.stringify(shareData) // 공유 데이터 전송
+            );
+        }, function (error) {
+            console.error("WebSocket Connection Failed:", error);
+        });
+    }
+
+    
         document.addEventListener("DOMContentLoaded", function () {
+        	sendShareEvent(); // 함수가 선언된 후 호출
             initCalendar();
             connectWebSocket();
+            initShareFeature();
             themeInit();
-
+	
             // Hide schedule details on outside click
             document.addEventListener("click", function (e) {
                 const details = document.getElementById("schedule-details");
@@ -50,7 +113,7 @@
                 moreLinkClick: "popover",
                 events: fetchEvents,
                 eventClick: showEventDetails,
-                select: showScheduleDetails,
+                select: handleDateSelect,
             });
             calendar.render();
 
@@ -79,13 +142,14 @@
                     </div>`;
             }
 
-            function showScheduleDetails(info) {
-                const details = document.getElementById("schedule-details");
-                const content = document.getElementById("schedule-content");
-
-                // 날짜 변환 및 필드 값 설정
+            function handleDateSelect(info) {
                 const startValue = formatDate(info.startStr);
                 const endValue = info.endStr ? formatDate(info.endStr) : "";
+
+                if (!startValue) {
+                    console.error("Invalid start date");
+                    return;
+                }
 
                 document.getElementById("event-start").value = startValue;
                 document.getElementById("event-end").value = endValue;
@@ -96,6 +160,9 @@
                     method: "GET",
                     data: { start: info.startStr, end: info.endStr },
                     success: function (data) {
+                        const details = document.getElementById("schedule-details");
+                        const content = document.getElementById("schedule-content");
+
                         details.classList.remove("hidden");
                         content.innerHTML = data.length > 0
                             ? data.map(event => `<p>${event.title}</p>`).join("")
@@ -150,9 +217,11 @@
         }
 
         function formatDate(dateString) {
-            const date = new Date(dateString);
+            if (!dateString) return ""; // 유효하지 않은 경우 빈 문자열 반환
 
-            // 날짜와 시간을 2자리로 맞춥니다.
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return ""; // 유효하지 않은 날짜 처리
+
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, "0");
             const day = String(date.getDate()).padStart(2, "0");
@@ -232,6 +301,24 @@
             
             <button type="submit" class="btn btn-primary w-full">일정 추가</button>
         </form>
+        
+	 <button id="share-button" class="btn btn-secondary mt-4 w-full">공유</button>
+</div>
+
+<!-- 공유 설정 모달 -->
+<div id="share-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+    <div class="bg-white p-6 rounded shadow-lg">
+        <h3 class="text-lg font-bold mb-4">일정 공유</h3>
+        <label for="share-user">공유 대상:</label>
+        <input type="text" id="share-user" class="input input-bordered w-full mb-4" placeholder="사용자 ID 또는 그룹 입력" />
+        <label for="share-permission">권한:</label>
+        <select id="share-permission" class="select select-bordered w-full mb-4">
+            <option value="view">보기</option>
+            <option value="edit">수정</option>
+        </select>
+        <button id="confirm-share" class="btn btn-primary w-full">공유하기</button>
+        <button id="close-share" class="btn btn-secondary w-full mt-2">닫기</button>
+    </div>
 </div>
 
  <!-- WebSocket 메시지 영역 -->
