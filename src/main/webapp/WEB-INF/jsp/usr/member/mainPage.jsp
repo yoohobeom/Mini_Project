@@ -23,201 +23,144 @@
 <title>유저 메인</title>
 
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        initCalendar();
-        connectWebSocket();
-        themeInit();
+        document.addEventListener("DOMContentLoaded", function () {
+            initCalendar();
+            connectWebSocket();
+            themeInit();
 
-        // 화면 클릭 시 일정 창 닫기
-        document.addEventListener("click", function (event) {
-            const calendarEl = document.getElementById("calendar-container");
-            const scheduleDetails = document.getElementById("schedule-details");
+            // Hide schedule details on outside click
+            document.addEventListener("click", function (e) {
+                const details = document.getElementById("schedule-details");
+                const calendar = document.getElementById("calendar-container");
+                if (!details.contains(e.target) && !calendar.contains(e.target)) {
+                    details.classList.add("hidden");
+                }
+            });
+        });
 
-            if (!scheduleDetails.contains(event.target) && !calendarEl.contains(event.target)) {
-                scheduleDetails.classList.add("hidden");
+        function initCalendar() {
+            const calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
+                locale: "ko",
+                headerToolbar: { left: "", center: "prev title next", right: "today" },
+                initialView: "dayGridMonth",
+                height: "500px",
+                selectable: true,
+                editable: true,
+                dayMaxEvents: true,
+                moreLinkClick: "popover",
+                events: fetchEvents,
+                eventClick: showEventDetails,
+                select: showScheduleDetails,
+            });
+            calendar.render();
+
+            function fetchEvents(info, successCallback) {
+                $.get("/api/events/search", { start: info.startStr, end: info.endStr }).done(data =>
+                    successCallback(data.map(event => ({ ...event, color: event.color })))
+                );
             }
-        });
-    });
 
-    function initCalendar() {
-        const calendarEl = document.getElementById("calendar");
-        const scheduleDetails = document.getElementById("schedule-details");
-        const scheduleContent = document.getElementById("schedule-content");
-        const eventForm = document.getElementById("event-form");
+            function showEventDetails(info) {
+                const event = info.event;
+                const details = document.getElementById("schedule-details");
+                const content = document.getElementById("schedule-content");
 
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            locale: 'ko',
-            headerToolbar: { right: 'today', center: 'prev title next', left: '' },
-            initialView: "dayGridMonth",
-            height: '500px',
-            selectable: true,
-            editable: true,
-            dayMaxEvents: true, // 일정 요약 활성화
-            eventDisplay: 'block', // 블록 스타일로 표시
-            moreLinkClick: 'popover', // 클릭 시 popover로 표시
-            morePopoverContent: true, // popover 내용 표시
-            events: fetchEvents,
-            eventClick: displayEventDetails,
-            select: handleDateSelect
-        });
+                details.classList.remove("hidden");
 
-        calendar.render();
+                // 종료 시간 처리: 종료 시간이 없는 경우 대체 텍스트 표시
+                const endTime = event.end ? event.end.toISOString() : "종료 시간 없음";
 
-        function fetchEvents(fetchInfo, successCallback, failureCallback) {
-            $.ajax({
-                url: '/api/events/search',
-                method: 'GET',
-                data: { start: fetchInfo.startStr, end: fetchInfo.endStr },
-                success: function (data) {
-                    successCallback(data.map(event => ({
-                        id: event.id,
-                        title: event.title,
-                        start: event.start,
-                        end: event.end,
-                        color: event.color,
-                        extendedProps: event
-                    })));
-                },
-                error: failureCallback
-            });
-        }
+                content.innerHTML = `
+                    <div>
+                        <h4>${event.title}</h4>
+                        <p>설명: ${event.extendedProps.description || "설명 없음"}</p>
+                        <p>시작: ${event.start.toISOString()}</p>
+                        <p>종료: ${endTime}</p>
+                    </div>`;
+            }
 
-        function displayEventDetails(info) {
-            const event = info.event;
-            scheduleDetails.classList.remove("hidden");
-            scheduleContent.innerHTML = `
-                <div>
-                    <h4>${event.title}</h4>
-                    <p>설명: ${event.extendedProps.description || '설명 없음'}</p>
-                    <p>시작: ${event.start.toISOString()}</p>
-                    <p>종료: ${event.end ? event.end.toISOString() : '종료 시간 없음'}</p>
-                </div>`;
-        }
+            function showScheduleDetails(info) {
+                const details = document.getElementById("schedule-details");
+                const content = document.getElementById("schedule-content");
 
-        function handleDateSelect(info) {
-            // 날짜 형식 변환
-            const startValue = formatDateForInput(info.startStr);
-            const endValue = info.endStr ? formatDateForInput(info.endStr) : "";
+                // 날짜 변환 및 필드 값 설정
+                const startValue = formatDate(info.startStr);
+                const endValue = info.endStr ? formatDate(info.endStr) : "";
 
-            // 입력 필드 값 설정
-            document.getElementById("event-start").value = startValue;
-            document.getElementById("event-end").value = endValue;
+                document.getElementById("event-start").value = startValue;
+                document.getElementById("event-end").value = endValue;
 
-            // 일정 불러오기
-            $.ajax({
-                url: '/api/events/search',
-                method: 'GET',
-                data: { start: info.startStr, end: info.endStr },
-                success: function (data) {
-                    scheduleDetails.classList.remove("hidden");
-                    scheduleContent.innerHTML = data.length > 0
-                        ? data.map(event => `<p>${event.title}</p>`).join('')
-                        : '<p>선택한 날짜에 일정이 없습니다.</p>';
-                },
-                error: function () {
-                    alert('일정을 불러오는 데 실패했습니다.');
-                }
-            });
-        }
-
-        // 일정 추가 폼 제출
-        eventForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            const newEvent = {
-                title: document.getElementById("event-title").value,
-                start: document.getElementById("event-start").value,
-                end: document.getElementById("event-end").value || null,
-                allDay: false
-            };
-
-            $.ajax({
-                url: '/api/events/add',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(newEvent),
-                success: function (response) {
-                    calendar.addEvent(newEvent); // 캘린더에 즉시 반영
-                    console.log('Event added successfully:', response);
-                    eventForm.reset(); // 폼 초기화
-                    scheduleContent.innerHTML += `<p>${newEvent.title}</p>`; // 새로운 일정 표시
-                },
-                error: function () {
-                    alert('새로운 이벤트를 추가하는 데 실패했습니다.');
-                }
-            });
-        });
-    }
-
-    function connectWebSocket() {
-        const socket = new SockJS('/ws');
-        const stompClient = StompJs.Stomp.over(socket);
-
-        stompClient.connect({}, function () {
-            console.log('WebSocket Connected');
-
-            // WebSocket으로 이벤트 업데이트 받기
-            stompClient.subscribe('/topic/events', function (message) {
-                const eventData = JSON.parse(message.body);
-                handleWebSocketEvent(eventData);
-            });
-        });
-    }
-
-    function handleWebSocketEvent(eventData) {
-        const calendar = FullCalendar.Calendar.getCalendar('calendar');
-        if (!calendar) return;
-
-        switch (eventData.action) {
-            case 'add':
-                calendar.addEvent({
-                    id: eventData.eventId,
-                    title: eventData.title,
-                    start: eventData.start,
-                    end: eventData.end,
-                    color: eventData.color
+                // AJAX로 선택한 날짜의 일정 조회
+                $.ajax({
+                    url: "/api/events/search",
+                    method: "GET",
+                    data: { start: info.startStr, end: info.endStr },
+                    success: function (data) {
+                        details.classList.remove("hidden");
+                        content.innerHTML = data.length > 0
+                            ? data.map(event => `<p>${event.title}</p>`).join("")
+                            : "<p>선택한 날짜에 일정이 없습니다.</p>";
+                    },
+                    error: function () {
+                        alert("일정을 불러오는 데 실패했습니다.");
+                    },
                 });
-                break;
-            case 'update':
-                const existingEvent = calendar.getEventById(eventData.eventId);
-                if (existingEvent) {
-                    existingEvent.setProp('title', eventData.title);
-                    existingEvent.setDates(eventData.start, eventData.end);
-                }
-                break;
-            case 'delete':
-                const eventToDelete = calendar.getEventById(eventData.eventId);
-                if (eventToDelete) {
-                    eventToDelete.remove();
-                }
-                break;
-            default:
-                console.warn('Unknown action:', eventData.action);
+            }
+
+            document.getElementById("event-form").addEventListener("submit", function (e) {
+                e.preventDefault();
+                const newEvent = {
+                    title: document.getElementById("event-title").value,
+                    start: document.getElementById("event-start").value,
+                    end: document.getElementById("event-end").value || null,
+                    allDay: false,
+                };
+                $.post({
+                    url: "/api/events/add",
+                    contentType: "application/json",
+                    data: JSON.stringify(newEvent),
+                }).done(() => {
+                    calendar.addEvent(newEvent);
+                    this.reset();
+                });
+            });
         }
-    }
 
-    function formatDateForInput(dateString) {
-        const date = new Date(dateString);
+        function connectWebSocket() {
+            const socket = new SockJS("/ws");
+            const stompClient = StompJs.Stomp.over(socket);
+            stompClient.connect({}, () => {
+                stompClient.subscribe("/topic/events", message => {
+                    const event = JSON.parse(message.body);
+                    console.log(event); // Handle incoming WebSocket event
+                });
+            });
+        }
 
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        const hours = String(date.getHours()).padStart(2, "0");
-        const minutes = String(date.getMinutes()).padStart(2, "0");
+        function themeInit() {
+            const theme = localStorage.getItem("theme") || "light";
+            document.documentElement.setAttribute("data-theme", theme);
+        }
 
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    }
+        function themeSwap() {
+            const current = document.documentElement.getAttribute("data-theme");
+            const next = current === "light" ? "dark" : "light";
+            document.documentElement.setAttribute("data-theme", next);
+            localStorage.setItem("theme", next);
+        }
 
-    function themeInit() {
-        const theme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-    }
+        function formatDate(dateString) {
+            const date = new Date(dateString);
 
-    function themeSwap() {
-        const currentTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        localStorage.setItem('theme', currentTheme);
-    }
+            // 날짜와 시간을 2자리로 맞춥니다.
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            const hours = String(date.getHours()).padStart(2, "0");
+            const minutes = String(date.getMinutes()).padStart(2, "0");
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
 
     </script>
 
