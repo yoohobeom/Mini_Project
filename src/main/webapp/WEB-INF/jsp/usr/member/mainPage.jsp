@@ -143,18 +143,22 @@
             }
 
             function handleDateSelect(info) {
+                // 날짜 형식 변환
                 const startValue = formatDate(info.startStr);
                 const endValue = info.endStr ? formatDate(info.endStr) : "";
 
+                // 값이 유효하지 않은 경우 오류 처리
                 if (!startValue) {
-                    console.error("Invalid start date");
+                    console.error("Invalid start date:", info.startStr);
+                    alert("유효하지 않은 시작 날짜입니다.");
                     return;
                 }
 
+                // 입력 필드에 값 설정
                 document.getElementById("event-start").value = startValue;
-                document.getElementById("event-end").value = endValue;
+                document.getElementById("event-end").value = endValue || "";
 
-                // AJAX로 선택한 날짜의 일정 조회
+                // 일정 창 표시 및 AJAX 요청으로 선택된 날짜의 일정 조회
                 $.ajax({
                     url: "/api/events/search",
                     method: "GET",
@@ -217,10 +221,10 @@
         }
 
         function formatDate(dateString) {
-            if (!dateString) return ""; // 유효하지 않은 경우 빈 문자열 반환
+            if (!dateString) return ""; // 유효하지 않은 값 처리
 
             const date = new Date(dateString);
-            if (isNaN(date.getTime())) return ""; // 유효하지 않은 날짜 처리
+            if (isNaN(date.getTime())) return ""; // 잘못된 날짜 처리
 
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -228,7 +232,7 @@
             const hours = String(date.getHours()).padStart(2, "0");
             const minutes = String(date.getMinutes()).padStart(2, "0");
 
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
+            return `${year}-${month}-${day}T${hours}:${minutes}`; // datetime-local 요구 형식
         }
 
     </script>
