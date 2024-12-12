@@ -190,32 +190,30 @@
 	                    	const description = event.description || "설명 없음";
 	
 	                    	listHTML += `
-	                         <li class="relative p-2">
-	                         <label class="flex items-center">
-	                         	<input 
-	                         		type="checkbox" 
-	                                name="selected-events" 
-	                                value="\${event.id}" 
-	                                class="mr-2"
-	                                data-title="\${title}" 
-	                                data-start="\${start}" 
-	                                data-end="\${end}" 
-	                              />
-	                          </label>
-	                          <div>
-                              <button 
-                                  class="text-blue-500 underline"
-                                  data-title="\${title}" 
-                                  data-start="\${start}" 
-                                  data-end="\${end}" 
-                                  data-description="\${description}"
-                              >
-                                   \${title} (\${start} - \${end})
-                              </button>
-	                          </div>
-	                          <!-- 상세 정보가 추가될 공간 -->
-	                          <div class="hidden bg-gray-100 p-4 mt-2 border rounded" data-detail></div>
-	                        </li>`;
+	                         		<li class="relative p-2">
+	                         		<label class="flex items-center">
+	                         			<input 
+	                         			type="checkbox" 
+	                                	name="selected-events" 
+	                                	value="\${event.id}" 
+	                                	class="mr-2"
+	                                	data-title="\${title}" 
+	                                	data-start="\${start}" 
+	                                	data-end="\${end}" 
+	                             		 />
+	                          		</label>
+                              		<button 
+                                  		class="text-blue-500 underline"
+                                  		data-title="\${title}" 
+                                  		data-start="\${start}" 
+                                  		data-end="\${end}" 
+                                  		data-description="\${description}"
+                              		>
+                                   		\${title} (\${start} - \${end})
+                              		</button>
+	                          		<!-- 상세 정보가 추가될 공간 -->
+	                          		<div class="hidden bg-gray-100 p-4 mt-2 border rounded" data-detail></div>
+	                        		</li>`;
 	                	});
 	                	listHTML += "</ul>";
 	                	content.innerHTML = listHTML;
