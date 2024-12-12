@@ -23,71 +23,100 @@
 <title>유저 메인</title>
 
 <script>
-	function initShareFeature() {
-	    const shareButton = document.getElementById("share-button");
-	    const shareModal = document.getElementById("share-modal");
-	    const closeShareButton = document.getElementById("close-share");
-	    const confirmShareButton = document.getElementById("confirm-share");
+// 	function initShareFeature() {
+// 	    const shareButton = document.getElementById("share-button");
+// 	    const shareModal = document.getElementById("share-modal");
+// 	    const closeShareButton = document.getElementById("close-share");
+// 	    const confirmShareButton = document.getElementById("confirm-share");
 	
-	    // 공유 버튼 클릭 시 모달 표시
-	    shareButton.addEventListener("click", function () {
-	        shareModal.classList.remove("hidden");
-	    });
+// 	    // 공유 버튼 클릭 시 모달 표시
+// 	    shareButton.addEventListener("click", function () {
+// 	        shareModal.classList.remove("hidden");
+// 	    });
 	
-	    // 모달 닫기
-	    closeShareButton.addEventListener("click", function () {
-	        shareModal.classList.add("hidden");
-	    });
+// 	    // 모달 닫기
+// 	    closeShareButton.addEventListener("click", function () {
+// 	        shareModal.classList.add("hidden");
+// 	    });
 	
-	    // 공유하기 버튼 클릭 시 처리
-	    confirmShareButton.addEventListener("click", function () {
-	        const eventTitle = document.getElementById("event-title").value;
-	        const shareUser = document.getElementById("share-user").value;
-	        const permission = document.getElementById("share-permission").value;
+// 	    // 공유하기 버튼 클릭 시 처리
+// 	    confirmShareButton.addEventListener("click", function () {
+// 	        const eventTitle = document.getElementById("event-title").value;
+// 	        const shareUser = document.getElementById("share-user").value;
+// 	        const permission = document.getElementById("share-permission").value;
 	
-	        if (!shareUser) {
-	            alert("공유 대상을 입력해주세요.");
-	            return;
-	        }
+// 	        if (!shareUser) {
+// 	            alert("공유 대상을 입력해주세요.");
+// 	            return;
+// 	        }
 	
-	        // WebSocket을 통해 공유 요청 전송
-	        sendShareEvent({
-	            action: "share",
-	            eventTitle: eventTitle,
-	            sharedWith: shareUser,
-	            permission: permission,
-	        });
+// 	        // WebSocket을 통해 공유 요청 전송
+// 	        sendShareEvent({
+// 	            action: "share",
+// 	            eventTitle: eventTitle,
+// 	            sharedWith: shareUser,
+// 	            permission: permission,
+// 	        });
 	
-	        alert(`"${eventTitle}" 일정이 ${shareUser}에게 공유되었습니다.`);
-	        shareModal.classList.add("hidden");
-	    });
-	}
+// 	        alert(`"${eventTitle}" 일정이 ${shareUser}에게 공유되었습니다.`);
+// 	        shareModal.classList.add("hidden");
+// 	    });
+// 	}
 
-	// WebSocket으로 공유 이벤트 전송
-	function sendShareEvent(shareData) {
-	    const socket = new SockJS("/ws"); // WebSocket 연결
-	    const stompClient = StompJs.Stomp.over(socket); // Stomp 클라이언트 생성
+// 	// WebSocket으로 공유 이벤트 전송
+// 	function sendShareEvent(shareData) {
+// 	    const socket = new SockJS("/ws"); // WebSocket 연결
+// 	    const stompClient = StompJs.Stomp.over(socket); // Stomp 클라이언트 생성
 	
-	    // WebSocket 연결 및 메시지 전송
-	    stompClient.connect({}, function () {
-	        console.log("WebSocket Connected");
+// 	    // WebSocket 연결 및 메시지 전송
+// 	    stompClient.connect({}, function () {
+// 	        console.log("WebSocket Connected");
 	
-	        stompClient.send(
-	            "/app/share-event", // 서버의 WebSocket 핸들러
-	            {},
-	            JSON.stringify(shareData) // 공유 데이터 전송
-	        );
-	    }, function (error) {
-	        console.error("WebSocket Connection Failed:", error);
-	    });
-	}
+// 	        stompClient.send(
+// 	            "/app/share-event", // 서버의 WebSocket 핸들러
+// 	            {},
+// 	            JSON.stringify(shareData) // 공유 데이터 전송
+// 	        );
+// 	    }, function (error) {
+// 	        console.error("WebSocket Connection Failed:", error);
+// 	    });
+// 	}
 
+
+        // WebSocket 초기화
+        const socket = new SockJS("/ws");
+        const stompClient = StompJs.Stomp.over(socket);
+
+        stompClient.connect({}, function () {
+            console.log("WebSocket Connected");
+        }, function (error) {
+            console.error("WebSocket Connection Failed:", error);
+        });
+
+        // WebSocket을 통해 공유 데이터 전송
+        function shareEventsWebSocket(eventIds, shareUser) {
+            if (!stompClient.connected) {
+                alert("WebSocket 연결이 끊어졌습니다. 다시 시도해주세요.");
+                return;
+            }
+
+            const shareData = {
+                action: "share",
+                eventIds: eventIds,
+                sharedWith: shareUser,
+            };
+
+            stompClient.send(
+                "/app/share-event", // 서버의 WebSocket 핸들러
+                {},
+                JSON.stringify(shareData)
+            );
+
+            alert(`선택된 일정이 ${shareUser}에게 공유되었습니다.`);
+        }
    
 	document.addEventListener("DOMContentLoaded", function () {
-		sendShareEvent(); // 함수가 선언된 후 호출
 		initCalendar();
-		connectWebSocket();
-		initShareFeature();
 		themeInit();
 	});
 	
@@ -153,7 +182,7 @@
 	
 	            	if (data.length > 0) {
 	                	// 필요한 속성만 사용하여 리스트 생성
-	                	let listHTML = "<ul class='list-disc list-inside'>";
+	                	let listHTML = "<ul class='list-none list-inside'>";
 	                	data.forEach(event => {
 	                    	const title = event.title || "제목 없음"; // `title` 속성 추출
 	                    	const start = event.start || "시작 시간 없음";
@@ -161,18 +190,31 @@
 	                    	const description = event.description || "설명 없음";
 	
 	                    	listHTML += `
-	                    		<li class="relative">
-	                            	<button 
-		                                class="text-blue-500 underline"
-		                                data-title="\${title}" 
-		                                data-start="\${start}" 
-		                                data-end="\${end}" 
-		                                data-description="\${description}"
-	                            	>
-	                                	\${title} (\${start} - \${end})
-	                            	</button>
-	                            	<!-- 상세 정보가 추가될 공간 -->
-	                            	<div class="hidden bg-gray-100 p-4 mt-2 border rounded" data-detail></div>
+	                         <li class="relative p-2">
+	                         <label class="flex items-center">
+	                         	<input 
+	                         		type="checkbox" 
+	                                name="selected-events" 
+	                                value="\${event.id}" 
+	                                class="mr-2"
+	                                data-title="\${title}" 
+	                                data-start="\${start}" 
+	                                data-end="\${end}" 
+	                              />
+	                          </label>
+	                          <div>
+                              <button 
+                                  class="text-blue-500 underline"
+                                  data-title="\${title}" 
+                                  data-start="\${start}" 
+                                  data-end="\${end}" 
+                                  data-description="\${description}"
+                              >
+                                   \${title} (\${start} - \${end})
+                              </button>
+	                          </div>
+	                          <!-- 상세 정보가 추가될 공간 -->
+	                          <div class="hidden bg-gray-100 p-4 mt-2 border rounded" data-detail></div>
 	                        </li>`;
 	                	});
 	                	listHTML += "</ul>";
@@ -183,6 +225,7 @@
 	                        button.addEventListener("click", function () {
 	                            const parent = this.parentElement; // 부모 li 요소
 	                            const detailDiv = parent.querySelector("[data-detail]");
+	                            console.log(detailDiv);
 	                            const title = this.getAttribute("data-title");
 	                            const start = this.getAttribute("data-start");
 	                            const end = this.getAttribute("data-end");
@@ -203,6 +246,33 @@
 	                            }
 	                        });
 	                    });
+	                    
+	                    // 이벤트 위임으로 삭제 버튼 클릭 이벤트 처리
+	                    document.addEventListener("click", function (e) {
+	                        if (e.target && e.target.id === "delete-events") {
+	                            const selectedIds = getSelectedEventIds();
+	                            console.log(document.getElementById("delete-events"));
+	                            if (selectedIds.length === 0) {
+	                                alert("선택된 일정이 없습니다.");
+	                                return;
+	                            }
+	                            if (confirm("선택된 일정을 삭제하시겠습니까?")) {
+	                                deleteEvents(selectedIds);
+	                            }
+	                        }
+
+	                        if (e.target && e.target.id === "share-events") {
+	                            const selectedIds = getSelectedEventIds();
+	                            if (selectedIds.length === 0) {
+	                                alert("선택된 일정이 없습니다.");
+	                                return;
+	                            }
+	                            const shareUser = prompt("공유할 사용자 ID를 입력하세요:");
+	                            if (shareUser) {
+	                                shareEventsWebSocket(selectedIds, shareUser);
+	                            }
+	                        }
+	                    });           
 	                	
 	            	} else {
 	                	content.innerHTML = `<p>선택한 날짜에 일정이 없습니다.</p>`;
@@ -213,37 +283,57 @@
 	        	},
 	    	});
 		}
-	
-		// 일정추가
-		document.getElementById("event-form").addEventListener("submit", function (e) {
-	    	e.preventDefault();
-	    	const newEvent = {
-	        	title: document.getElementById("event-title").value,
-	        	start: document.getElementById("event-start").value,
-	        	end: document.getElementById("event-end").value || null,
-	        	allDay: false,
-	    	};
-	    	$.post({
-	        	url: "/api/events/add",
-	        	contentType: "application/json",
-	        	data: JSON.stringify(newEvent),
-	    	}).done(() => {
-	        	calendar.addEvent(newEvent);
-	        	this.reset();
-	    		});
-			});
 	}
-
-	function connectWebSocket() {
-	    const socket = new SockJS("/ws");
-	    const stompClient = StompJs.Stomp.over(socket);
-	    stompClient.connect({}, () => {
-	        stompClient.subscribe("/topic/events", message => {
-	            const event = JSON.parse(message.body);
-	            console.log(event); // Handle incoming WebSocket event
-	        });
+	
+	// 선택된 일정 ID 가져오기
+	function getSelectedEventIds() {
+		
+		let selectedIds = [];
+		
+		$("input[name='selected-events']:checked").each(function () {
+			let selectedId = $(this).val();
+			selectedIds.push(selectedId);
+		})
+		
+		return selectedIds;
+// 	    return Array.from(document.querySelectorAll("input[name='selected-events']:checked")).map(
+// 		        checkbox => checkbox.value
+// 	    ); 
+	}
+	
+	// 일정 삭제 함수
+	function deleteEvents(eventIds) {
+// 		console.log("selectedIds : ", selectedIds);
+		console.log(eventIds);
+		// 숫자 배열로 변환
+// 		const numericIds = eventIds.map(id => parseInt(id, 10));
+		
+	    $.ajax({
+	        url: "/api/events/delete",
+	        method: "POST",
+	        contentType: "application/json",
+	        data: { ids: eventIds },
+	        traditional: true,
+	        success: function () {
+	            alert("선택된 일정이 삭제되었습니다.");
+	            location.reload(); // 새로고침하여 업데이트
+	        },
+	        error: function () {
+	            alert("일정 삭제에 실패했습니다.");
+	        },
 	    });
 	}
+	
+// 	function connectWebSocket() {
+// 	    const socket = new SockJS("/ws");
+// 	    const stompClient = StompJs.Stomp.over(socket);
+// 	    stompClient.connect({}, () => {
+// 	        stompClient.subscribe("/topic/events", message => {
+// 	            const event = JSON.parse(message.body);
+// 	            console.log(event); // Handle incoming WebSocket event
+// 	        });
+// 	    });
+// 	}
 	
 	function themeInit() {
 	    const theme = localStorage.getItem("theme") || "light";
@@ -308,11 +398,18 @@
 
 <!-- 일정 상세 정보 -->
 <div id="schedule-details" class="p-4 ml-44 mr-44 mt-20 bg-gray-100 border border-gray-300 rounded">
-    <h3 class="text-lg font-bold mb-2">선택한 날짜의 일정</h3>
+    <h3 class="text-lg font-bold mb-2">일정 상세보기
+    	<div class="flex justify-end space-x-2">
+	        <button id="create-event" class="btn btn-secondary mt-4 w-15">생성</button>
+	        <button id="edit-event" class="btn btn-secondary mt-4 w-15">수정</button>
+	        <button id="share-events" class="btn btn-secondary mt-4 w-15">공유</button>
+	        <button id="delete-events" class="btn btn-secondary mt-4 w-15">삭제</button>
+    	</div>
+    </h3>
+	
     <div id="schedule-content">
         <p>날짜를 선택하여 일정을 확인하세요.</p>
     </div>
-    
 <!--      <h3 class="text-lg font-bold mt-4">새로운 일정 추가</h3> -->
 <!--         <form id="event-form" class="mt-2"> -->
 <!--             <label class="block">제목:</label> -->
@@ -327,7 +424,6 @@
 <!--             <button type="submit" class="btn btn-primary w-full">일정 추가</button> -->
 <!--         </form> -->
         
-	 <button id="share-button" class="btn btn-secondary mt-4 w-full">공유</button>
 </div>
 
 <!-- 공유 설정 모달 -->

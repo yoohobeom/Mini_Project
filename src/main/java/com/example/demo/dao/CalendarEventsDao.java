@@ -53,8 +53,15 @@ public interface CalendarEventsDao {
     void updateEvent(CalendarEvent event);
 
     // 이벤트 삭제
-    @Delete("DELETE FROM calendar_events WHERE id = #{id}")
-    void deleteEvent(int id);
+    @Delete({
+        "<script>",
+        "DELETE FROM calendar_events WHERE id IN",
+        "<foreach collection='ids' item='id' open='(' separator=',' close=')'>",
+        "#{id}",
+        "</foreach>",
+        "</script>"
+    })
+    void deleteEvent(List<Integer> ids);
 
     // 특정 날짜 범위의 이벤트 검색
     @Select("""

@@ -1,6 +1,7 @@
 package com.example.demo.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,4 +25,6 @@ public class CalendarEvent {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String status;
+    
+    private List<Integer> ids; // 삭제할 ID 리스트
 }
