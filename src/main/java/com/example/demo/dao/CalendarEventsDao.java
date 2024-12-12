@@ -62,7 +62,7 @@ public interface CalendarEventsDao {
             FROM calendar_events e
             LEFT JOIN categories c ON e.category_id = c.id
             LEFT JOIN member m ON e.owner_id = m.id
-            WHERE e.start >= #{start} AND e.end <= #{end}
+            WHERE e.start < #{end} AND e.end > #{start}
             """)
     List<CalendarEvent> searchEvents(@Param("start") String start, @Param("end") String end);
 }

@@ -22,220 +22,223 @@
 <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
 <title>유저 메인</title>
 
-    <script>
-    
-    function initShareFeature() {
-        const shareButton = document.getElementById("share-button");
-        const shareModal = document.getElementById("share-modal");
-        const closeShareButton = document.getElementById("close-share");
-        const confirmShareButton = document.getElementById("confirm-share");
-
-        // 공유 버튼 클릭 시 모달 표시
-        shareButton.addEventListener("click", function () {
-            shareModal.classList.remove("hidden");
-        });
-
-        // 모달 닫기
-        closeShareButton.addEventListener("click", function () {
-            shareModal.classList.add("hidden");
-        });
-
-        // 공유하기 버튼 클릭 시 처리
-        confirmShareButton.addEventListener("click", function () {
-            const eventTitle = document.getElementById("event-title").value;
-            const shareUser = document.getElementById("share-user").value;
-            const permission = document.getElementById("share-permission").value;
-
-            if (!shareUser) {
-                alert("공유 대상을 입력해주세요.");
-                return;
-            }
-
-            // WebSocket을 통해 공유 요청 전송
-            sendShareEvent({
-                action: "share",
-                eventTitle: eventTitle,
-                sharedWith: shareUser,
-                permission: permission,
-            });
-
-            alert(`"${eventTitle}" 일정이 ${shareUser}에게 공유되었습니다.`);
-            shareModal.classList.add("hidden");
-        });
-    }
-    
- // WebSocket으로 공유 이벤트 전송
-    function sendShareEvent(shareData) {
-        const socket = new SockJS("/ws"); // WebSocket 연결
-        const stompClient = StompJs.Stomp.over(socket); // Stomp 클라이언트 생성
-
-        // WebSocket 연결 및 메시지 전송
-        stompClient.connect({}, function () {
-            console.log("WebSocket Connected");
-
-            stompClient.send(
-                "/app/share-event", // 서버의 WebSocket 핸들러
-                {},
-                JSON.stringify(shareData) // 공유 데이터 전송
-            );
-        }, function (error) {
-            console.error("WebSocket Connection Failed:", error);
-        });
-    }
-
-    
-        document.addEventListener("DOMContentLoaded", function () {
-        	sendShareEvent(); // 함수가 선언된 후 호출
-            initCalendar();
-            connectWebSocket();
-            initShareFeature();
-            themeInit();
+<script>
+	function initShareFeature() {
+	    const shareButton = document.getElementById("share-button");
+	    const shareModal = document.getElementById("share-modal");
+	    const closeShareButton = document.getElementById("close-share");
+	    const confirmShareButton = document.getElementById("confirm-share");
 	
-            // Hide schedule details on outside click
-            document.addEventListener("click", function (e) {
-                const details = document.getElementById("schedule-details");
-                const calendar = document.getElementById("calendar-container");
-                if (!details.contains(e.target) && !calendar.contains(e.target)) {
-                    details.classList.add("hidden");
-                }
-            });
-        });
+	    // 공유 버튼 클릭 시 모달 표시
+	    shareButton.addEventListener("click", function () {
+	        shareModal.classList.remove("hidden");
+	    });
+	
+	    // 모달 닫기
+	    closeShareButton.addEventListener("click", function () {
+	        shareModal.classList.add("hidden");
+	    });
+	
+	    // 공유하기 버튼 클릭 시 처리
+	    confirmShareButton.addEventListener("click", function () {
+	        const eventTitle = document.getElementById("event-title").value;
+	        const shareUser = document.getElementById("share-user").value;
+	        const permission = document.getElementById("share-permission").value;
+	
+	        if (!shareUser) {
+	            alert("공유 대상을 입력해주세요.");
+	            return;
+	        }
+	
+	        // WebSocket을 통해 공유 요청 전송
+	        sendShareEvent({
+	            action: "share",
+	            eventTitle: eventTitle,
+	            sharedWith: shareUser,
+	            permission: permission,
+	        });
+	
+	        alert(`"${eventTitle}" 일정이 ${shareUser}에게 공유되었습니다.`);
+	        shareModal.classList.add("hidden");
+	    });
+	}
 
-        function initCalendar() {
-            const calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
-                locale: "ko",
-                headerToolbar: { left: "", center: "prev title next", right: "today" },
-                initialView: "dayGridMonth",
-                height: "500px",
-                selectable: true,
-                editable: true,
-                dayMaxEvents: true,
-                moreLinkClick: "popover",
-                events: fetchEvents,
-                eventClick: showEventDetails,
-                select: handleDateSelect,
-            });
-            calendar.render();
+	// WebSocket으로 공유 이벤트 전송
+	function sendShareEvent(shareData) {
+	    const socket = new SockJS("/ws"); // WebSocket 연결
+	    const stompClient = StompJs.Stomp.over(socket); // Stomp 클라이언트 생성
+	
+	    // WebSocket 연결 및 메시지 전송
+	    stompClient.connect({}, function () {
+	        console.log("WebSocket Connected");
+	
+	        stompClient.send(
+	            "/app/share-event", // 서버의 WebSocket 핸들러
+	            {},
+	            JSON.stringify(shareData) // 공유 데이터 전송
+	        );
+	    }, function (error) {
+	        console.error("WebSocket Connection Failed:", error);
+	    });
+	}
 
-            function fetchEvents(info, successCallback) {
-                $.get("/api/events/search", { start: info.startStr, end: info.endStr }).done(data =>
-                    successCallback(data.map(event => ({ ...event, color: event.color })))
-                );
-            }
+   
+	document.addEventListener("DOMContentLoaded", function () {
+		sendShareEvent(); // 함수가 선언된 후 호출
+		initCalendar();
+		connectWebSocket();
+		initShareFeature();
+		themeInit();
+	});
+	
+	function initCalendar() {
+		const calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
+			locale: "ko",
+			headerToolbar: { left: "", center: "prev title next", right: "today" },
+			initialView: "dayGridMonth",
+			height: "500px",
+			selectable: true,
+			editable: true,
+			dayMaxEvents: true,
+			moreLinkClick: "popover",
+			events: fetchEvents,
+			select: handleDateSelect,
+		});
+			calendar.render();
+	
+		function fetchEvents(info, successCallback, failureCallback) {
+			$.get("/api/events/search", { start: info.startStr, end: info.endStr })
+				.done(data => {
+					const events = data.map(event => ({
+						title: event.title || "제목 없음", // 제목 기본값 설정
+						start: event.start,
+	                    end: event.end || null, // 종료 시간 없는 경우 처리
+						allDay: false, // 필요하면 추가
+	                    color: "#3788d8" // 필요하면 색상 추가
+					}));
+	                    console.log("Processed Events:", events); // 디버깅용
+	                      successCallback(events);
+				})
+				.fail(() => {
+					alert("이벤트를 가져오는 데 실패했습니다.");
+					failureCallback();
+				});
+		}
+	
+	//           function showEventDetails(info) {
+	//               const event = info.event;
+	//               const details = document.getElementById("schedule-details");
+	//               const content = document.getElementById("schedule-content");
+	
+	//               details.classList.remove("hidden");
+	
+	//               // 종료 시간 처리: 종료 시간이 없는 경우 대체 텍스트 표시
+	//               const endTime = event.end ? event.end.toISOString() : "종료 시간 없음";
+	
+	//               content.innerHTML = `
+	//                   <div>
+	//                       <h4>${event.title}</h4>
+	//                       <p>설명: ${event.extendedProps.description || "설명 없음"}</p>
+	//                       <p>시작: ${event.start.toISOString()}</p>
+	//                       <p>종료: ${endTime}</p>
+	//                   </div>`;
+	//           }
+	          
+		// 날짜 선택
+		function handleDateSelect(info) {
+	    	// 선택한 날짜의 시작 및 종료 시간 계산
+	    	const selectedDate = info.startStr; // 선택한 날짜의 시작 시간
+	    	const nextDate = new Date(info.start); // 선택한 날짜의 다음 날
+	    	nextDate.setDate(nextDate.getDate() + 1);
+	    	const endOfDay = nextDate.toISOString().split("T")[0]; // 다음 날의 00:00:00
+	
+	    	// 일정 디테일 표시 영역
+	    	const event = info.event;
+	    	const details = document.getElementById("schedule-details");
+	    	const content = document.getElementById("schedule-content");
+	
+	   		// AJAX 요청으로 해당 날짜의 일정 가져오기
+	    	$.ajax({
+	        	url: "/api/events/search",
+	        	method: "GET",
+	        	data: {
+	            	start: info.startStr, // 시작 날짜
+	            	end: info.endStr,       // 종료 날짜
+	        	},
+	        	success: function (data) {
+	            	console.log("Fetched Data:", data); // 디버깅용
+	
+	            	details.classList.remove("hidden");
+	
+	            	if (data.length > 0) {
+	                	// 필요한 속성만 사용하여 리스트 생성
+	                	let listHTML = "<ul class='list-disc list-inside'>";
+	                	data.forEach(event => {
+	                    	const title = event.title || "제목 없음"; // `title` 속성 추출
+	                    	console.log(event.title);
+	                    	const start = event.start || "시작 시간 없음";
+	                    	const end = event.end || "종료 시간 없음";
+	
+	                    	listHTML += `
+	                        	<li>
+	                            	<strong>\${title}</strong> (\${start} - \${end})
+	                        	</li>`;
+	                	});
+	                	listHTML += "</ul>";
+	                	content.innerHTML = listHTML;
+	            	} else {
+	                	content.innerHTML = `<p>선택한 날짜에 일정이 없습니다.</p>`;
+	            	}
+	        	},
+	        	error: function () {
+	            	alert("일정을 불러오는 데 실패했습니다.");
+	        	},
+	    	});
+		}
+	
+		// 일정추가
+		document.getElementById("event-form").addEventListener("submit", function (e) {
+	    	e.preventDefault();
+	    	const newEvent = {
+	        	title: document.getElementById("event-title").value,
+	        	start: document.getElementById("event-start").value,
+	        	end: document.getElementById("event-end").value || null,
+	        	allDay: false,
+	    	};
+	    	$.post({
+	        	url: "/api/events/add",
+	        	contentType: "application/json",
+	        	data: JSON.stringify(newEvent),
+	    	}).done(() => {
+	        	calendar.addEvent(newEvent);
+	        	this.reset();
+	    		});
+			});
+	}
 
-            function showEventDetails(info) {
-                const event = info.event;
-                const details = document.getElementById("schedule-details");
-                const content = document.getElementById("schedule-content");
-
-                details.classList.remove("hidden");
-
-                // 종료 시간 처리: 종료 시간이 없는 경우 대체 텍스트 표시
-                const endTime = event.end ? event.end.toISOString() : "종료 시간 없음";
-
-                content.innerHTML = `
-                    <div>
-                        <h4>${event.title}</h4>
-                        <p>설명: ${event.extendedProps.description || "설명 없음"}</p>
-                        <p>시작: ${event.start.toISOString()}</p>
-                        <p>종료: ${endTime}</p>
-                    </div>`;
-            }
-
-            function handleDateSelect(info) {
-                // 날짜 형식 변환
-                const startValue = formatDate(info.startStr);
-                const endValue = info.endStr ? formatDate(info.endStr) : "";
-
-                // 값이 유효하지 않은 경우 오류 처리
-                if (!startValue) {
-                    console.error("Invalid start date:", info.startStr);
-                    alert("유효하지 않은 시작 날짜입니다.");
-                    return;
-                }
-
-                // 입력 필드에 값 설정
-                document.getElementById("event-start").value = startValue;
-                document.getElementById("event-end").value = endValue || "";
-
-                // 일정 창 표시 및 AJAX 요청으로 선택된 날짜의 일정 조회
-                $.ajax({
-                    url: "/api/events/search",
-                    method: "GET",
-                    data: { start: info.startStr, end: info.endStr },
-                    success: function (data) {
-                        const details = document.getElementById("schedule-details");
-                        const content = document.getElementById("schedule-content");
-
-                        details.classList.remove("hidden");
-                        content.innerHTML = data.length > 0
-                            ? data.map(event => `<p>${event.title}</p>`).join("")
-                            : "<p>선택한 날짜에 일정이 없습니다.</p>";
-                    },
-                    error: function () {
-                        alert("일정을 불러오는 데 실패했습니다.");
-                    },
-                });
-            }
-
-            document.getElementById("event-form").addEventListener("submit", function (e) {
-                e.preventDefault();
-                const newEvent = {
-                    title: document.getElementById("event-title").value,
-                    start: document.getElementById("event-start").value,
-                    end: document.getElementById("event-end").value || null,
-                    allDay: false,
-                };
-                $.post({
-                    url: "/api/events/add",
-                    contentType: "application/json",
-                    data: JSON.stringify(newEvent),
-                }).done(() => {
-                    calendar.addEvent(newEvent);
-                    this.reset();
-                });
-            });
-        }
-
-        function connectWebSocket() {
-            const socket = new SockJS("/ws");
-            const stompClient = StompJs.Stomp.over(socket);
-            stompClient.connect({}, () => {
-                stompClient.subscribe("/topic/events", message => {
-                    const event = JSON.parse(message.body);
-                    console.log(event); // Handle incoming WebSocket event
-                });
-            });
-        }
-
-        function themeInit() {
-            const theme = localStorage.getItem("theme") || "light";
-            document.documentElement.setAttribute("data-theme", theme);
-        }
-
-        function themeSwap() {
-            const current = document.documentElement.getAttribute("data-theme");
-            const next = current === "light" ? "dark" : "light";
-            document.documentElement.setAttribute("data-theme", next);
-            localStorage.setItem("theme", next);
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return ""; // 유효하지 않은 값 처리
-
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return ""; // 잘못된 날짜 처리
-
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, "0");
-            const day = String(date.getDate()).padStart(2, "0");
-            const hours = String(date.getHours()).padStart(2, "0");
-            const minutes = String(date.getMinutes()).padStart(2, "0");
-
-            return `${year}-${month}-${day}T${hours}:${minutes}`; // datetime-local 요구 형식
-        }
-
-    </script>
+	function connectWebSocket() {
+	    const socket = new SockJS("/ws");
+	    const stompClient = StompJs.Stomp.over(socket);
+	    stompClient.connect({}, () => {
+	        stompClient.subscribe("/topic/events", message => {
+	            const event = JSON.parse(message.body);
+	            console.log(event); // Handle incoming WebSocket event
+	        });
+	    });
+	}
+	
+	function themeInit() {
+	    const theme = localStorage.getItem("theme") || "light";
+	    document.documentElement.setAttribute("data-theme", theme);
+	}
+	
+	function themeSwap() {
+	    const current = document.documentElement.getAttribute("data-theme");
+	    const next = current === "light" ? "dark" : "light";
+	    document.documentElement.setAttribute("data-theme", next);
+	    localStorage.setItem("theme", next);
+	}
+</script>
 
 </head>
 
@@ -286,25 +289,25 @@
 </div>
 
 <!-- 일정 상세 정보 -->
-<div id="schedule-details" class="hidden p-4 ml-44 bg-gray-100 border border-gray-300 rounded">
+<div id="schedule-details" class="p-4 ml-44 mr-44 mt-20 bg-gray-100 border border-gray-300 rounded">
     <h3 class="text-lg font-bold mb-2">선택한 날짜의 일정</h3>
     <div id="schedule-content">
         <p>날짜를 선택하여 일정을 확인하세요.</p>
     </div>
     
-     <h3 class="text-lg font-bold mt-4">새로운 일정 추가</h3>
-        <form id="event-form" class="mt-2">
-            <label class="block">제목:</label>
-            <input type="text" id="event-title" class="input input-bordered w-full mb-2" required>
+<!--      <h3 class="text-lg font-bold mt-4">새로운 일정 추가</h3> -->
+<!--         <form id="event-form" class="mt-2"> -->
+<!--             <label class="block">제목:</label> -->
+<!--             <input type="text" id="event-title" class="input input-bordered w-full mb-2" required> -->
             
-            <label class="block">시작 시간:</label>
-            <input type="datetime-local" id="event-start" class="input input-bordered w-full mb-2" required>
+<!--             <label class="block">시작 시간:</label> -->
+<!--             <input type="datetime-local" id="event-start" class="input input-bordered w-full mb-2" required> -->
             
-            <label class="block">종료 시간:</label>
-            <input type="datetime-local" id="event-end" class="input input-bordered w-full mb-4">
+<!--             <label class="block">종료 시간:</label> -->
+<!--             <input type="datetime-local" id="event-end" class="input input-bordered w-full mb-4"> -->
             
-            <button type="submit" class="btn btn-primary w-full">일정 추가</button>
-        </form>
+<!--             <button type="submit" class="btn btn-primary w-full">일정 추가</button> -->
+<!--         </form> -->
         
 	 <button id="share-button" class="btn btn-secondary mt-4 w-full">공유</button>
 </div>
@@ -326,7 +329,7 @@
 </div>
 
  <!-- WebSocket 메시지 영역 -->
-    <div id="messages" class="p-4 ml-44 bg-gray-100 border border-gray-300 rounded mt-4"></div>
+<!--     <div id="messages" class="p-4 ml-44 bg-gray-100 border border-gray-300 rounded mt-4"></div> -->
 
 <!-- 게시글 리스트 -->
 <section class="mt-8">
