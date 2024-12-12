@@ -125,25 +125,6 @@
 				});
 		}
 	
-	//           function showEventDetails(info) {
-	//               const event = info.event;
-	//               const details = document.getElementById("schedule-details");
-	//               const content = document.getElementById("schedule-content");
-	
-	//               details.classList.remove("hidden");
-	
-	//               // 종료 시간 처리: 종료 시간이 없는 경우 대체 텍스트 표시
-	//               const endTime = event.end ? event.end.toISOString() : "종료 시간 없음";
-	
-	//               content.innerHTML = `
-	//                   <div>
-	//                       <h4>${event.title}</h4>
-	//                       <p>설명: ${event.extendedProps.description || "설명 없음"}</p>
-	//                       <p>시작: ${event.start.toISOString()}</p>
-	//                       <p>종료: ${endTime}</p>
-	//                   </div>`;
-	//           }
-	          
 		// 날짜 선택
 		function handleDateSelect(info) {
 	    	// 선택한 날짜의 시작 및 종료 시간 계산
@@ -175,17 +156,54 @@
 	                	let listHTML = "<ul class='list-disc list-inside'>";
 	                	data.forEach(event => {
 	                    	const title = event.title || "제목 없음"; // `title` 속성 추출
-	                    	console.log(event.title);
 	                    	const start = event.start || "시작 시간 없음";
 	                    	const end = event.end || "종료 시간 없음";
+	                    	const description = event.description || "설명 없음";
 	
 	                    	listHTML += `
-	                        	<li>
-	                            	<strong>\${title}</strong> (\${start} - \${end})
-	                        	</li>`;
+	                    		<li class="relative">
+	                            	<button 
+		                                class="text-blue-500 underline"
+		                                data-title="\${title}" 
+		                                data-start="\${start}" 
+		                                data-end="\${end}" 
+		                                data-description="\${description}"
+	                            	>
+	                                	\${title} (\${start} - \${end})
+	                            	</button>
+	                            	<!-- 상세 정보가 추가될 공간 -->
+	                            	<div class="hidden bg-gray-100 p-4 mt-2 border rounded" data-detail></div>
+	                        </li>`;
 	                	});
 	                	listHTML += "</ul>";
 	                	content.innerHTML = listHTML;
+	                	
+	                    // 클릭 이벤트 추가
+	                    document.querySelectorAll("#schedule-content button").forEach(button => {
+	                        button.addEventListener("click", function () {
+	                            const parent = this.parentElement; // 부모 li 요소
+	                            const detailDiv = parent.querySelector("[data-detail]");
+	                            const title = this.getAttribute("data-title");
+	                            const start = this.getAttribute("data-start");
+	                            const end = this.getAttribute("data-end");
+	                            const description = this.getAttribute("data-description");
+
+	                            // 상세 정보 토글
+	                            if (detailDiv.classList.contains("hidden")) {
+	                                detailDiv.innerHTML = `
+	                                    <h4 class="text-lg font-bold">${title}</h4>
+	                                    <p><strong>시작 시간:</strong> ${start}</p>
+	                                    <p><strong>종료 시간:</strong> ${end}</p>
+	                                    <p><strong>설명:</strong> ${description}</p>
+	                                `;
+	                                detailDiv.classList.remove("hidden");
+	                            } else {
+	                                detailDiv.classList.add("hidden");
+	                                detailDiv.innerHTML = ""; // 상세 정보 초기화
+	                            }
+	                        });
+	                    });
+	                	
 	            	} else {
 	                	content.innerHTML = `<p>선택한 날짜에 일정이 없습니다.</p>`;
 	            	}
