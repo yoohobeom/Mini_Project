@@ -245,11 +245,18 @@
 	                        });
 	                    });
 	                    
-	                    // 이벤트 위임으로 삭제 버튼 클릭 이벤트 처리
+	                    // 이벤트 위임으로 버튼 클릭 이벤트 처리
 	                    document.addEventListener("click", function (e) {
-	                        if (e.target && e.target.id === "delete-events") {
+	                    	if (e.target && e.target.id === "create-event") {
+	                    		$("#add-modal").removeClass("hidden");
+	                    	}
+	                    	
+	                    	// 삭제 기능
+	                    	if (e.target && e.target.id === "delete-events") {
 	                            const selectedIds = getSelectedEventIds();
+	                            
 	                            console.log(document.getElementById("delete-events"));
+	                            
 	                            if (selectedIds.length === 0) {
 	                                alert("선택된 일정이 없습니다.");
 	                                return;
@@ -258,9 +265,10 @@
 	                                deleteEvents(selectedIds);
 	                            }
 	                        }
-
+							// 공유 기능
 	                        if (e.target && e.target.id === "share-events") {
 	                            const selectedIds = getSelectedEventIds();
+	                            
 	                            if (selectedIds.length === 0) {
 	                                alert("선택된 일정이 없습니다.");
 	                                return;
@@ -294,34 +302,33 @@
 		})
 		
 		return selectedIds;
-// 	    return Array.from(document.querySelectorAll("input[name='selected-events']:checked")).map(
-// 		        checkbox => checkbox.value
-// 	    ); 
 	}
 	
-	
-//     const test = function () {
-//         let param = [];
-        
-//         $("input[name='selected-events']:checked").each(function () {
-//            param.push($(this).val());
-//         })
-        
-//         $.ajax({
-//            url : '/api/events/delete',
-//            type : 'POST',
-//            data : {
-//               ids : param,
-//            },
-//            dataType : 'text',
-//            success : function(data) {
-//               console.log(data);
-//            },
-//            error : function(xhr, status, error) {
-//               console.log(error);
-//            }
-//         })
-//      }
+    // 일정 추가
+    $("#add-event-form").on("submit", function (e) {
+        e.preventDefault();
+
+        const newEvent = {
+            title: $("#add-event-title").val(),
+            start: $("#add-event-start").val(),
+            end: $("#add-event-end").val()
+        };
+
+        $.ajax({
+            url: "/api/events",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(event),
+            success: function () {
+                alert("일정이 추가되었습니다.");
+                $("#add-modal").addClass("hidden");
+                calendar.refetchEvents(); // 캘린더 갱신
+            },
+            error: function () {
+                alert("일정 추가에 실패했습니다.");
+            }
+        });
+    });
 	
 	// 일정 삭제 함수
 	function deleteEvents(eventIds) {
@@ -359,6 +366,11 @@
 // 	        });
 // 	    });
 // 	}
+	
+	    // 일정 추가 버튼
+    $("#create-event").on("click", function () {
+        $("#add-modal").removeClass("hidden");
+    });
 	
 	function themeInit() {
 	    const theme = localStorage.getItem("theme") || "light";
@@ -429,31 +441,32 @@
 	        <button id="edit-event" class="btn btn-secondary mt-4 w-15">수정</button>
 	        <button id="share-events" class="btn btn-secondary mt-4 w-15">공유</button>
 	        <button id="delete-events" class="btn btn-secondary mt-4 w-15">삭제</button>
-	        <div>
-		      <input name="test" type="checkbox" value="1" /> test1
-		      <input name="test" type="checkbox" value="2" /> test2
-		      <button onclick="test();">전송</button>
-   			</div>
     	</div>
     </h3>
 	
     <div id="schedule-content">
         <p>날짜를 선택하여 일정을 확인하세요.</p>
     </div>
-<!--      <h3 class="text-lg font-bold mt-4">새로운 일정 추가</h3> -->
-<!--         <form id="event-form" class="mt-2"> -->
-<!--             <label class="block">제목:</label> -->
-<!--             <input type="text" id="event-title" class="input input-bordered w-full mb-2" required> -->
+</div>
+
+<!-- 일정 추가 모달 -->
+<div id="add-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+    <div class="bg-white p-6 rounded shadow-lg">
+        <h3 class="text-lg font-bold mb-4">일정 추가</h3>
+        <form id="add-event-form">
+            <label for="add-event-title">제목:</label>
+            <input type="text" id="add-event-title" class="input input-bordered w-full mb-4" required />
             
-<!--             <label class="block">시작 시간:</label> -->
-<!--             <input type="datetime-local" id="event-start" class="input input-bordered w-full mb-2" required> -->
+            <label for="add-event-start">시작 시간:</label>
+            <input type="datetime-local" id="add-event-start" class="input input-bordered w-full mb-4" required />
             
-<!--             <label class="block">종료 시간:</label> -->
-<!--             <input type="datetime-local" id="event-end" class="input input-bordered w-full mb-4"> -->
+            <label for="add-event-end">종료 시간:</label>
+            <input type="datetime-local" id="add-event-end" class="input input-bordered w-full mb-4" />
             
-<!--             <button type="submit" class="btn btn-primary w-full">일정 추가</button> -->
-<!--         </form> -->
-        
+            <button type="submit" class="btn btn-primary w-full">저장</button>
+            <button type="button" id="close-add-modal" class="btn btn-secondary w-full mt-2">닫기</button>
+        </form>
+    </div>
 </div>
 
 <!-- 공유 설정 모달 -->
