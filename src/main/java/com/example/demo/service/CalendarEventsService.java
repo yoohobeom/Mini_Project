@@ -37,7 +37,7 @@ public class CalendarEventsService {
     }
 
     // ID로 이벤트 삭제
-    public void deleteEvent(@RequestBody List<Integer> ids) {
+    public void deleteEvent(List<Integer> ids) {
         calendarEventsDao.deleteEvent(ids);
     }
 

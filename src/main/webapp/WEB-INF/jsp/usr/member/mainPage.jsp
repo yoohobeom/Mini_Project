@@ -232,10 +232,10 @@
 	                            // 상세 정보 토글
 	                            if (detailDiv.classList.contains("hidden")) {
 	                                detailDiv.innerHTML = `
-	                                    <h4 class="text-lg font-bold">${title}</h4>
-	                                    <p><strong>시작 시간:</strong> ${start}</p>
-	                                    <p><strong>종료 시간:</strong> ${end}</p>
-	                                    <p><strong>설명:</strong> ${description}</p>
+	                                    <h4 class="text-lg font-bold">\${title}</h4>
+	                                    <p><strong>시작 시간:</strong>\${start}</p>
+	                                    <p><strong>종료 시간:</strong>\${end}</p>
+	                                    <p><strong>설명:</strong>\${description}</p>
 	                                `;
 	                                detailDiv.classList.remove("hidden");
 	                            } else {
@@ -299,25 +299,52 @@
 // 	    ); 
 	}
 	
+	
+//     const test = function () {
+//         let param = [];
+        
+//         $("input[name='selected-events']:checked").each(function () {
+//            param.push($(this).val());
+//         })
+        
+//         $.ajax({
+//            url : '/api/events/delete',
+//            type : 'POST',
+//            data : {
+//               ids : param,
+//            },
+//            dataType : 'text',
+//            success : function(data) {
+//               console.log(data);
+//            },
+//            error : function(xhr, status, error) {
+//               console.log(error);
+//            }
+//         })
+//      }
+	
 	// 일정 삭제 함수
 	function deleteEvents(eventIds) {
-// 		console.log("selectedIds : ", selectedIds);
+		
+		let param = [];
 		console.log(eventIds);
-		// 숫자 배열로 변환
-// 		const numericIds = eventIds.map(id => parseInt(id, 10));
+		
+        $("input[name='selected-events']:checked").each(function () {
+            param.push($(this).val());
+         })
 		
 	    $.ajax({
 	        url: "/api/events/delete",
 	        method: "POST",
-	        contentType: "application/json",
-	        data: { ids: eventIds },
-	        traditional: true,
-	        success: function () {
+	        data: { ids: param },
+	        success: function (data) {
 	            alert("선택된 일정이 삭제되었습니다.");
+	            console.log(data);
 	            location.reload(); // 새로고침하여 업데이트
 	        },
 	        error: function () {
 	            alert("일정 삭제에 실패했습니다.");
+	            console.log(error);
 	        },
 	    });
 	}
@@ -402,6 +429,11 @@
 	        <button id="edit-event" class="btn btn-secondary mt-4 w-15">수정</button>
 	        <button id="share-events" class="btn btn-secondary mt-4 w-15">공유</button>
 	        <button id="delete-events" class="btn btn-secondary mt-4 w-15">삭제</button>
+	        <div>
+		      <input name="test" type="checkbox" value="1" /> test1
+		      <input name="test" type="checkbox" value="2" /> test2
+		      <button onclick="test();">전송</button>
+   			</div>
     	</div>
     </h3>
 	
