@@ -14,52 +14,55 @@ import com.example.demo.dto.CalendarEvent;
 @Mapper
 public interface CalendarEventsDao {
 
+    // 이벤트 추가
     @Insert("""
             INSERT INTO calendar_events
-                SET title = #{title}
-                , description = #{description}
-                , start = #{start}
-                , end = #{end}
-                , all_day = #{allDay}
-                , location = #{location}
-                , color = #{color}
-                , category = #{category}
-                , created_at = NOW()
-                , updated_at = NOW()
-                , recurrence = #{recurrence}
-                , organizer_id = #{organizerId}
-                , status = #{status}
+            (title, description, start, end, all_day, category_id, owner_id, created_at, updated_at)
+            VALUES
+            (#{title}, #{description}, #{start}, #{end}, #{allDay}, #{categoryId}, #{ownerId}, NOW(), NOW())
             """)
     void addEvent(CalendarEvent event);
 
-    @Select("SELECT * FROM calendar_events WHERE id = #{id}")
+    // 특정 ID로 이벤트 조회
+    @Select("""
+            SELECT e.*, c.name AS category_name, m.name AS owner_name
+            FROM calendar_events e
+            LEFT JOIN categories c ON e.category_id = c.id
+            LEFT JOIN member m ON e.owner_id = m.id
+            WHERE e.id = #{id}
+            """)
     CalendarEvent getEventById(int id);
 
-    @Select("SELECT * FROM calendar_events")
+    // 모든 이벤트 조회
+    @Select("""
+            SELECT e.*, c.name AS category_name, u.username AS owner_name
+            FROM calendar_events e
+            LEFT JOIN categories c ON e.category_id = c.id
+            LEFT JOIN member m ON e.owner_id = m.id
+            """)
     List<CalendarEvent> getAllEvents();
 
+    // 이벤트 업데이트
     @Update("""
             UPDATE calendar_events
-                SET title = #{title}
-                , description = #{description}
-                , start = #{start}
-                , end = #{end}
-                , all_day = #{allDay}
-                , location = #{location}
-                , color = #{color}
-                , category = #{category}
-                , updated_at = NOW()
-                , recurrence = #{recurrence}
-                , organizer_id = #{organizerId}
-                , status = #{status}
+            SET title = #{title}, description = #{description}, start = #{start},
+                end = #{end}, all_day = #{allDay}, category_id = #{categoryId},
+                owner_id = #{ownerId}, updated_at = NOW()
             WHERE id = #{id}
             """)
     void updateEvent(CalendarEvent event);
 
+    // 이벤트 삭제
     @Delete("DELETE FROM calendar_events WHERE id = #{id}")
     void deleteEvent(int id);
-    
-    // 특정 날짜의 이벤트 검색
-    @Select("SELECT * FROM calendar_events WHERE start >= #{start} AND end <= #{end}")
+
+    // 특정 날짜 범위의 이벤트 검색
+    @Select("""
+            SELECT e.*, c.name AS category_name, m.name AS owner_name
+            FROM calendar_events e
+            LEFT JOIN categories c ON e.category_id = c.id
+            LEFT JOIN member m ON e.owner_id = m.id
+            WHERE e.start >= #{start} AND e.end <= #{end}
+            """)
     List<CalendarEvent> searchEvents(@Param("start") String start, @Param("end") String end);
 }

@@ -13,15 +13,15 @@ public class CalendarEvent {
     private int id;
     private String title;
     private String description;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private String start;
+    private String end;
     private boolean allDay;
     private String location;
     private String color;
-    private String category;
+    private int categoryId; // 기존 category를 정규화
+    private int recurrenceId; // 반복 규칙
+    private int ownerId; // 소유자
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String recurrence;
-    private int organizerId;
     private String status;
 }
