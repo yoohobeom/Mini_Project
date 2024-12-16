@@ -54,12 +54,15 @@ public class UsrCalendarEventController {
         return "Event updated successfully";
     }
 
-    // ID로 이벤트 삭제
-    @DeleteMapping("/delete/{id}")
+//    // ID로 이벤트 삭제
+    @PostMapping("/delete")
     @ResponseBody
-    public String deleteEvent(@PathVariable int id) {
-        calendarEventsService.deleteEvent(id);
-        return "Event deleted successfully";
+    public String deleteEvent(@RequestParam(value="ids[]") List<Integer> ids) {
+    	for (int a : ids) {
+    		System.out.println(a);
+    	}
+    	calendarEventsService.deleteEvent(ids);
+    	return "Event deleted successfully";
     }
 
     // 특정 날짜 범위로 이벤트 검색

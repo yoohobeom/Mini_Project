@@ -204,3 +204,31 @@ SELECT NOW()
         , CONCAT('제목_', FLOOR(RAND() * 10000))
         , CONCAT('내용_', FLOOR(RAND() * 10000))
     FROM article;
+    
+
+
+CREATE TABLE `calendar_events` (
+    `id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    `title` VARCHAR(255) NOT NULL,
+    `description` TEXT,
+    `start` DATETIME NOT NULL,
+    `end` DATETIME,
+    `all_day` TINYINT(1) DEFAULT 0,
+    `category_id` INT UNSIGNED, -- 카테고리 참조
+    `owner_id` INT UNSIGNED, -- 사용자 참조
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+SELECT * FROM `calendar_events`
+	WHERE id = '6'
+
+INSERT INTO `calendar_events`
+	SET title = 'test1'
+		, `start` = NOW();
+		
+		
+UPDATE `calendar_events`
+	SET `start` = '2024-12-09 09:00:00'
+		, `end` = '2024-12-13 09:00:00'
+	

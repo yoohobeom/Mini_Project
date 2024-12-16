@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.demo.dao.CalendarEventsDao;
 import com.example.demo.dto.CalendarEvent;
@@ -36,8 +37,8 @@ public class CalendarEventsService {
     }
 
     // ID로 이벤트 삭제
-    public void deleteEvent(int id) {
-        calendarEventsDao.deleteEvent(id);
+    public void deleteEvent(List<Integer> ids) {
+        calendarEventsDao.deleteEvent(ids);
     }
 
     // 특정 날짜 범위로 이벤트 검색

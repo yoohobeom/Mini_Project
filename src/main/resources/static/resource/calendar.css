@@ -32,7 +32,8 @@
 
 #calendar {
 	width: 100% !important; /* 캘린더의 너비를 100%로 강제 설정 */
-    max-width: 500px !important; /* 최대 너비를 800px로 강제 설정 */
+	height: 63vh !important; /* 캘린더의 너비를 100%로 강제 설정 */
+    max-width: 600px !important; /* 최대 너비를 800px로 강제 설정 */
 }
 
 #schedule-details {
@@ -40,9 +41,8 @@
 	top: 0;
 	right: 0;
 	width: 100%;
-	max-width: 1200px;
-	height: 64vh;
-	padding: 10px;
+	max-width: 900px;
+	height: 65vh;
 	overflow-y: auto;
 	border-left: 1px solid #ccc;
 /* 	background-color: #f9f9f9; */
