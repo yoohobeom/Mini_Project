@@ -482,9 +482,9 @@
 		</ul>
 	</div>
 
-<!-- 캘린더 -->
+<!-- 캘린더 컨테이너 -->
 <div id="calendar-container" class="p-4 sm:ml-44">
-    <div id="calendar"></div>
+    <div id="calendar" class="shadow-lg rounded-lg overflow-hidden border border-gray-200"></div>
 </div>
 
 <!-- 일정 상세 정보 -->
