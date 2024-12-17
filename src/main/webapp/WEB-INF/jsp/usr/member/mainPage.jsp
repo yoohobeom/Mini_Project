@@ -114,10 +114,61 @@
 
             alert(`선택된 일정이 ${shareUser}에게 공유되었습니다.`);
         }
-   
+ 
+    let selectedDate = null; // 선택된 날짜를 저장하는 전역 변수
+    let selectedEndDate = null;    // 선택된 종료 날짜 (전역 변수)
+    
 	document.addEventListener("DOMContentLoaded", function () {
 		initCalendar();
 		themeInit();
+	    // 이벤트 리스너 중복 방지: 기존 리스너를 초기화
+	    resetButtonListeners();
+		
+	    // 이벤트 위임으로 버튼 클릭 이벤트 등록
+	    document.getElementById("schedule-details").addEventListener("click", function (e) {
+	        const target = e.target;
+
+	        // 일정 생성 버튼
+	        if (e.target && e.target.id === "create-event") {
+	            if (selectedDate) {
+	                const formattedDate = `\${selectedDate}T00:00`;
+	                const formattedEndDate = `\${selectedEndDate}T23:59`;
+	                openAddEventModal(formattedDate, formattedEndDate);
+	            } else {
+	                alert("날짜를 먼저 선택해주세요.");
+	                console.log(selectedDate);
+	            }
+	        }
+	        // 일정 수정 버튼
+	        if (target.id === "edit-event") {
+	            alert("수정 기능은 아직 구현되지 않았습니다.");
+	        }
+
+	        // 일정 삭제 버튼
+	        else if (target.id === "delete-events") {
+	            const selectedIds = getSelectedEventIds();
+	            if (selectedIds.length === 0) {
+	                alert("삭제할 일정을 선택하세요.");
+	                return;
+	            }
+	            if (confirm("선택된 일정을 삭제하시겠습니까?")) {
+	                deleteEvents(selectedIds);
+	            }
+	        }
+
+	        // 일정 공유 버튼
+	        else if (target.id === "share-events") {
+	            const selectedIds = getSelectedEventIds();
+	            if (selectedIds.length === 0) {
+	                alert("공유할 일정을 선택하세요.");
+	                return;
+	            }
+	            const shareUser = prompt("공유할 사용자 ID를 입력하세요:");
+	            if (shareUser) {
+	                shareEventsWebSocket(selectedIds, shareUser);
+	            }
+	        }
+	    });
 	});
 	
 	function initCalendar() {
@@ -156,8 +207,16 @@
 	
 		// 날짜 선택
 		function handleDateSelect(info) {
+		    // 버튼 활성화
+		    enableButtons();
+			
 	    	// 선택한 날짜의 시작 및 종료 시간 계산
-	    	const selectedDate = info.startStr; // 선택한 날짜의 시작 시간
+	    	selectedDate = info.startStr; // 선택한 날짜의 시작 시간
+	    	
+	        const endDate = new Date(info.endStr);
+	        endDate.setDate(endDate.getDate() - 1);
+	        selectedEndDate = endDate.toISOString().split("T")[0]; // YYYY-MM-DD 형식으로 변환
+	    	
 	    	const nextDate = new Date(info.start); // 선택한 날짜의 다음 날
 	    	nextDate.setDate(nextDate.getDate() + 1);
 	    	const endOfDay = nextDate.toISOString().split("T")[0]; // 다음 날의 00:00:00
@@ -181,105 +240,82 @@
 	            	details.classList.remove("hidden");
 	
 	            	if (data.length > 0) {
-	                	// 필요한 속성만 사용하여 리스트 생성
-	                	let listHTML = "<ul class='list-none list-inside'>";
-	                	data.forEach(event => {
-	                    	const title = event.title || "제목 없음"; // `title` 속성 추출
-	                    	const start = event.start || "시작 시간 없음";
-	                    	const end = event.end || "종료 시간 없음";
-	                    	const description = event.description || "설명 없음";
-	
-	                    	listHTML += `
-	                         		<li class="relative p-2">
-	                         		<label class="flex items-center">
-	                         			<input 
-	                         			type="checkbox" 
-	                                	name="selected-events" 
-	                                	value="\${event.id}" 
-	                                	class="mr-2"
-	                                	data-title="\${title}" 
-	                                	data-start="\${start}" 
-	                                	data-end="\${end}" 
-	                             		 />
-	                          		</label>
-                              		<button 
-                                  		class="text-blue-500 underline"
-                                  		data-title="\${title}" 
-                                  		data-start="\${start}" 
-                                  		data-end="\${end}" 
-                                  		data-description="\${description}"
-                              		>
-                                   		\${title} (\${start} - \${end})
-                              		</button>
-	                          		<!-- 상세 정보가 추가될 공간 -->
-	                          		<div class="hidden bg-gray-100 p-4 mt-2 border rounded" data-detail></div>
-	                        		</li>`;
-	                	});
-	                	listHTML += "</ul>";
-	                	content.innerHTML = listHTML;
-	                	
-	                    // 클릭 이벤트 추가
-	                    document.querySelectorAll("#schedule-content button").forEach(button => {
-	                        button.addEventListener("click", function () {
-	                            const parent = this.parentElement; // 부모 li 요소
-	                            const detailDiv = parent.querySelector("[data-detail]");
-	                            console.log(detailDiv);
-	                            const title = this.getAttribute("data-title");
-	                            const start = this.getAttribute("data-start");
-	                            const end = this.getAttribute("data-end");
-	                            const description = this.getAttribute("data-description");
+	            	    let listHTML = `
+	            	        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+	            	    `;
+	            	    data.forEach(event => {
+	            	        const title = event.title || "제목 없음";
+	            	        const start = event.start || "시작 시간 없음";
+	            	        const end = event.end || "종료 시간 없음";
+	            	        const description = event.description || "설명 없음";
 
-	                            // 상세 정보 토글
-	                            if (detailDiv.classList.contains("hidden")) {
-	                                detailDiv.innerHTML = `
-	                                    <h4 class="text-lg font-bold">\${title}</h4>
-	                                    <p><strong>시작 시간:</strong>\${start}</p>
-	                                    <p><strong>종료 시간:</strong>\${end}</p>
-	                                    <p><strong>설명:</strong>\${description}</p>
-	                                `;
-	                                detailDiv.classList.remove("hidden");
-	                            } else {
-	                                detailDiv.classList.add("hidden");
-	                                detailDiv.innerHTML = ""; // 상세 정보 초기화
-	                            }
-	                        });
-	                    });
-	                    
-	                    // 이벤트 위임으로 버튼 클릭 이벤트 처리
-	                    document.addEventListener("click", function (e) {
-	                    	if (e.target && e.target.id === "create-event") {
-	                    		$("#add-modal").removeClass("hidden");
-	                    	}
-	                    	
-	                    	// 삭제 기능
-	                    	if (e.target && e.target.id === "delete-events") {
-	                            const selectedIds = getSelectedEventIds();
-	                            
-	                            console.log(document.getElementById("delete-events"));
-	                            
-	                            if (selectedIds.length === 0) {
-	                                alert("선택된 일정이 없습니다.");
-	                                return;
-	                            }
-	                            if (confirm("선택된 일정을 삭제하시겠습니까?")) {
-	                                deleteEvents(selectedIds);
-	                            }
-	                        }
-							// 공유 기능
-	                        if (e.target && e.target.id === "share-events") {
-	                            const selectedIds = getSelectedEventIds();
-	                            
-	                            if (selectedIds.length === 0) {
-	                                alert("선택된 일정이 없습니다.");
-	                                return;
-	                            }
-	                            const shareUser = prompt("공유할 사용자 ID를 입력하세요:");
-	                            if (shareUser) {
-	                                shareEventsWebSocket(selectedIds, shareUser);
-	                            }
-	                        }
-	                    });           
-	                	
+	            	        listHTML += `
+	            	            <div class="bg-white border-l-4 border-blue-500 shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+	            	                 data-title="\${title}" 
+	            	                 data-start="\${start}" 
+	            	                 data-end="\${end}" 
+	            	                 data-description="\${description}">
+	            	                <div class="flex justify-between items-center">
+	            	                    <div>
+	            	                        <h4 class="text-lg font-semibold text-gray-700 mb-1">\${title}</h4>
+	            	                        <p class="text-sm text-gray-500">
+	            	                            <i class="fas fa-calendar-alt mr-1"></i> \${start} ~ \${end}
+	            	                        </p>
+	            	                        <p class="text-sm text-gray-500 mt-1 truncate">
+	            	                            <i class="fas fa-info-circle mr-1"></i> \${description}
+	            	                        </p>
+	            	                    </div>
+	            	                    <label class="flex items-center">
+	            	                        <input 
+	            	                            type="checkbox" 
+	            	                            name="selected-events" 
+	            	                            value="\${event.id}" 
+	            	                            class="h-5 w-5 text-blue-500 focus:ring focus:ring-blue-200"
+	            	                        />
+	            	                    </label>
+	            	                </div>
+	            	            </div>
+	            	        `;
+	            	    });
+	            	    listHTML += `</div>`;
+	            	    content.innerHTML = listHTML;
+
+	            	    // 카드 클릭 이벤트 연결
+	            	    document.querySelectorAll(".grid > div").forEach(card => {
+	            	        card.addEventListener("click", function (event) {
+	            	            // 체크박스 클릭 시 이벤트 중단
+	            	            if (event.target.type === "checkbox" || event.target.closest("input[type='checkbox']")) {
+	            	                return; // 이벤트 중단
+	            	            }
+	            	        	
+	            	            const modalTitle = this.getAttribute("data-title");
+	            	            const modalStart = this.getAttribute("data-start");
+	            	            const modalEnd = this.getAttribute("data-end");
+	            	            const modalDescription = this.getAttribute("data-description");
+
+	            	            // 모달에 데이터 삽입
+	            	            document.getElementById("modal-title").innerText = modalTitle;
+	            	            document.getElementById("modal-start").innerHTML = `<strong>시작 시간:</strong> ${modalStart}`;
+	            	            document.getElementById("modal-end").innerHTML = `<strong>종료 시간:</strong> ${modalEnd}`;
+	            	            document.getElementById("modal-description").innerHTML = `<strong>설명:</strong> ${modalDescription}`;
+
+	            	            // 모달 보이기
+	            	            document.getElementById("event-detail-modal").classList.remove("hidden");
+	            	        });
+	            	    });
+	            	 
+	            	    // 모달 닫기 이벤트
+	            	    document.getElementById("close-modal").addEventListener("click", function () {
+	            	        document.getElementById("event-detail-modal").classList.add("hidden");
+	            	    });
+	            	    
+	            	 // 모달 외부 클릭 시 닫기
+	            	    window.addEventListener("click", function (event) {
+	            	        const modal = document.getElementById("event-detail-modal");
+	            	        if (event.target === modal) { // 클릭된 대상이 모달 배경일 경우
+	            	            modal.classList.add("hidden"); // 모달 닫기
+	            	        }
+	            	    });
 	            	} else {
 	                	content.innerHTML = `<p>선택한 날짜에 일정이 없습니다.</p>`;
 	            	}
@@ -288,6 +324,14 @@
 	            	alert("일정을 불러오는 데 실패했습니다.");
 	        	},
 	    	});
+	   		
+	    	function enableButtons() {
+	    	    document.getElementById("create-event").disabled = false;
+	    	    document.getElementById("edit-event").disabled = false;
+	    	    document.getElementById("delete-events").disabled = false;
+	    	    document.getElementById("share-events").disabled = false;
+	    	}
+	   		
 		}
 	}
 	
@@ -305,30 +349,51 @@
 	}
 	
     // 일정 추가
-    $("#add-event-form").on("submit", function (e) {
-        e.preventDefault();
+	// 모달 열기/닫기 기능
+	function openAddEventModal(startDate, endDate) {
+		 console.log("전달된 시작 날짜:", startDate); // 전달된 날짜 값 확인
+		 console.log("전달된 종료 날짜:", endDate); // 전달된 날짜 값 확인
+	    $("#add-event-start").val(startDate); // 시작 날짜 자동 설정
+	   	$("#add-event-end").val(endDate);   // 종료 날짜 기본값 설정
+	    $("#add-modal").removeClass("hidden");
+	}
+	
+	function closeAddEventModal() {
+	    $("#add-modal").addClass("hidden");
+	}
+	
+	$(document).ready(function () {
+	    console.log("JQuery Ready!");
 
-        const newEvent = {
-            title: $("#add-event-title").val(),
-            start: $("#add-event-start").val(),
-            end: $("#add-event-end").val()
-        };
+	    $("#add-event-form").on("submit", function (e) {
+	        e.preventDefault();
 
-        $.ajax({
-            url: "/api/events",
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify(event),
-            success: function () {
-                alert("일정이 추가되었습니다.");
-                $("#add-modal").addClass("hidden");
-                calendar.refetchEvents(); // 캘린더 갱신
-            },
-            error: function () {
-                alert("일정 추가에 실패했습니다.");
-            }
-        });
-    });
+	        // 폼 데이터 확인
+	        const newEvent = {
+	            title: $("#add-event-title").val(),
+	            start: $("#add-event-start").val(),
+	            end: $("#add-event-end").val() || $("#add-event-start").val(),
+	        };
+	        console.log("전송할 데이터:", newEvent);
+
+	        // AJAX 요청 테스트
+	        $.ajax({
+	            url: "/api/events/add",
+	            method: "POST",
+	            contentType: "application/json",
+	            data: JSON.stringify(newEvent),
+	            success: function (response) {
+	                closeAddEventModal();
+		            location.reload(); // 새로고침하여 업데이트
+	            },
+	            error: function (xhr, status, error) {
+	                console.error("AJAX 오류 발생:", error);
+	            },
+	        });
+	    });
+	});
+
+
 	
 	// 일정 삭제 함수
 	function deleteEvents(eventIds) {
@@ -356,21 +421,10 @@
 	    });
 	}
 	
-// 	function connectWebSocket() {
-// 	    const socket = new SockJS("/ws");
-// 	    const stompClient = StompJs.Stomp.over(socket);
-// 	    stompClient.connect({}, () => {
-// 	        stompClient.subscribe("/topic/events", message => {
-// 	            const event = JSON.parse(message.body);
-// 	            console.log(event); // Handle incoming WebSocket event
-// 	        });
-// 	    });
-// 	}
-	
-	    // 일정 추가 버튼
-    $("#create-event").on("click", function () {
-        $("#add-modal").removeClass("hidden");
-    });
+	// 중복된 이벤트 리스너 제거 함수
+	function resetButtonListeners() {
+	    $("#create-event, #edit-event, #delete-events, #share-events").off("click");
+	}
 	
 	function themeInit() {
 	    const theme = localStorage.getItem("theme") || "light";
@@ -428,46 +482,72 @@
 		</ul>
 	</div>
 
-<!-- 캘린더 -->
-<div id="calendar-container" class="ml-44 p-4">
-    <div id="calendar"></div>
+<!-- 캘린더 컨테이너 -->
+<div id="calendar-container" class="p-4 sm:ml-44">
+    <div id="calendar" class="shadow-lg rounded-lg overflow-hidden border border-gray-200"></div>
 </div>
 
 <!-- 일정 상세 정보 -->
-<div id="schedule-details" class="p-4 ml-44 mr-44 mt-20 bg-gray-100 border border-gray-300 rounded">
-    <h3 class="text-lg font-bold mb-2">일정 상세보기
-    	<div class="flex justify-end space-x-2">
-	        <button id="create-event" class="btn btn-secondary mt-4 w-15">생성</button>
-	        <button id="edit-event" class="btn btn-secondary mt-4 w-15">수정</button>
-	        <button id="share-events" class="btn btn-secondary mt-4 w-15">공유</button>
-	        <button id="delete-events" class="btn btn-secondary mt-4 w-15">삭제</button>
-    	</div>
-    </h3>
-	
-    <div id="schedule-content">
-        <p>날짜를 선택하여 일정을 확인하세요.</p>
+<div id="schedule-details" class="p-4 sm:ml-44 sm:mr-44 mt-20 bg-white border border-gray-200 shadow-lg rounded-lg">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-2xl font-bold text-gray-700">일정 상세보기</h3>
+        
+        <!-- 버튼 영역 -->
+        <div class="flex flex-wrap gap-2">
+            <button id="create-event" class="btn btn-primary flex items-center">
+                <i class="fas fa-plus mr-2"></i> 생성
+            </button>
+            <button id="edit-event" class="btn btn-secondary flex items-center">
+                <i class="fas fa-edit mr-2"></i> 수정
+            </button>
+            <button id="share-events" class="btn btn-accent flex items-center">
+                <i class="fas fa-share-alt mr-2"></i> 공유
+            </button>
+            <button id="delete-events" class="btn btn-error flex items-center">
+                <i class="fas fa-trash mr-2"></i> 삭제
+            </button>
+        </div>
+    </div>
+
+    <!-- 일정 내용 -->
+    <div id="schedule-content" class="bg-gray-50 p-6 rounded-lg shadow-inner">
+        <p class="text-center text-gray-500">날짜를 선택하여 일정을 확인하세요.</p>
+    </div>
+</div>
+
+<!-- 상세 정보 모달 -->
+<div id="event-detail-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+    <div class="bg-white w-80 md:w-96 p-6 rounded-lg shadow-lg">
+        <h4 id="modal-title" class="text-lg font-bold mb-4"></h4>
+        <p id="modal-start" class="text-gray-600 mb-2"></p>
+        <p id="modal-end" class="text-gray-600 mb-2"></p>
+        <p id="modal-description" class="text-gray-700 mb-4"></p>
+        <div class="flex justify-end">
+            <button id="close-modal" class="btn btn-secondary">닫기</button>
+        </div>
     </div>
 </div>
 
 <!-- 일정 추가 모달 -->
-<div id="add-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-    <div class="bg-white p-6 rounded shadow-lg">
+<div id="add-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm p-6 rounded shadow-lg">
         <h3 class="text-lg font-bold mb-4">일정 추가</h3>
         <form id="add-event-form">
             <label for="add-event-title">제목:</label>
             <input type="text" id="add-event-title" class="input input-bordered w-full mb-4" required />
-            
+
             <label for="add-event-start">시작 시간:</label>
             <input type="datetime-local" id="add-event-start" class="input input-bordered w-full mb-4" required />
-            
+
             <label for="add-event-end">종료 시간:</label>
             <input type="datetime-local" id="add-event-end" class="input input-bordered w-full mb-4" />
-            
+
             <button type="submit" class="btn btn-primary w-full">저장</button>
-            <button type="button" id="close-add-modal" class="btn btn-secondary w-full mt-2">닫기</button>
+            <button type="button" onclick="closeAddEventModal()" class="btn btn-secondary w-full mt-2">닫기</button>
         </form>
     </div>
 </div>
+
 
 <!-- 공유 설정 모달 -->
 <div id="share-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
@@ -485,34 +565,24 @@
     </div>
 </div>
 
- <!-- WebSocket 메시지 영역 -->
-<!--     <div id="messages" class="p-4 ml-44 bg-gray-100 border border-gray-300 rounded mt-4"></div> -->
-
 <!-- 게시글 리스트 -->
 <section class="mt-8">
     <div class="container mx-auto">
-        <div class="w-9/12 mx-auto mb-2 pl-3 text-sm flex justify-between items-end">
+        <div class="w-full mb-4 pl-3 text-sm flex justify-between items-end">
             <div>총 : ${articlesCnt}개</div>
-            <form>
-                <input type="hidden" name="boardId" value="${board.getId()}" />
-                <div class="flex">
-                    <select class="select select-bordered select-sm mr-2" name="searchType">
-                        <option value="title" <c:if test="${searchType == 'title'}">selected="selected"</c:if>>제목</option>
-                        <option value="body" <c:if test="${searchType == 'body'}">selected="selected"</c:if>>내용</option>
-                        <option value="title,body" <c:if test="${searchType == 'title,body'}">selected="selected"</c:if>>제목 + 내용</option>
-                    </select>
-
-                    <label class="input input-bordered input-sm flex items-center gap-2 w-60">
-                        <input type="text" class="grow" name="searchKeyword" placeholder="검색어를 입력해주세요" maxlength="25" value="${searchKeyword}" />
-                    </label>
-
-                    <button class="hidden">검색</button>
-                </div>
+            <form class="flex items-center">
+                <select class="select select-bordered select-sm mr-2" name="searchType">
+                    <option value="title" <c:if test="${searchType == 'title'}">selected</c:if>>제목</option>
+                    <option value="body" <c:if test="${searchType == 'body'}">selected</c:if>>내용</option>
+                    <option value="title,body" <c:if test="${searchType == 'title,body'}">selected</c:if>>제목 + 내용</option>
+                </select>
+                <input type="text" class="input input-bordered input-sm w-60" name="searchKeyword" placeholder="검색어" maxlength="25" value="${searchKeyword}" />
+                <button class="btn btn-primary btn-sm ml-2">검색</button>
             </form>
         </div>
 
-        <!-- 게시글 테이블 -->
-        <div class="w-9/12 mx-auto">
+        <!-- 테이블: 큰 화면 -->
+        <div class="hidden sm:block w-full overflow-x-auto">
             <table class="table table-lg">
                 <thead>
                     <tr>
@@ -538,7 +608,22 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- 카드: 작은 화면 -->
+        <div class="sm:hidden">
+            <c:forEach var="article" items="${articles}">
+                <div class="border border-gray-300 rounded p-4 mb-2 bg-white shadow">
+                    <h4 class="font-bold mb-2">
+                        <a href="detail?id=${article.id}" class="text-blue-600">${article.title}</a>
+                    </h4>
+                    <p>작성자: ${article.loginId}</p>
+                    <p>작성일: ${article.regDate.substring(0, 10)}</p>
+                    <p>조회수: ${article.views} | 추천수: ${article.like}</p>
+                </div>
+            </c:forEach>
+        </div>
     </div>
 </section>
+
 </body>
 </html>
