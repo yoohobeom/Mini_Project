@@ -48,71 +48,73 @@
 /* 	background-color: #f9f9f9; */
 }
 
-/* FullCalendar 이벤트 스타일 */
-.fc-event {
-    background-color: #3b82f6; /* Tailwind: bg-blue-500 */
-    color: white;
-    border-radius: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease-in-out;
-    overflow: hidden; /* 넘치는 부분 숨김 */
-    text-overflow: ellipsis; /* 말줄임표 처리 */
-    white-space: nowrap; /* 한 줄로 표시 */
-}
-
-.fc-event:hover {
-    background-color: #2563eb; /* Tailwind: bg-blue-600 */
-    transform: scale(1.03);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
 /* FullCalendar 이벤트 메인 컨테이너 */
 .fc-event-main {
     display: flex;
     align-items: center;
     overflow: hidden;
     white-space: nowrap;
-    position: relative; /* 부모 컨테이너 위치 설정 */
-}
-
-/* 시간 부분 (항상 고정) */
-.fc-event-time {
-    flex-shrink: 0;
-    margin-right: 8px;
-    color: #333;
-    font-weight: bold;
-    z-index: 1; /* 시간 고정 */
-}
-
-/* 제목 부분 (스크롤 애니메이션 + 투명도 조절) */
-.fc-event-title {
-    display: inline-block;
-    animation: scrollText 6s linear infinite, fadeText 6s ease-in-out infinite;
-    padding-left: 50%; /* 시작 여백 */
-    padding-right: 50%; /* 끝 여백 */
     position: relative;
 }
 
-/* 스크롤 애니메이션 정의 */
+/* 시간 부분 (고정되면서 보이게 설정) */
+.fc-event-time {
+    flex-shrink: 0;
+    margin-right: 10px;
+    font-weight: bold;
+    color: #333; /* 시간 텍스트 색상 */
+    z-index: 2; /* 가장 위에 보이게 설정 */
+}
+
+/* 제목 부분 (스크롤 + 투명도 적용) */
+.fc-event-title {
+    display: inline-block;
+    animation: scrollText 6s linear infinite, fadeText 6s ease-in-out infinite;
+    padding-right: 50%; /* 스크롤이 자연스럽게 시작되도록 설정 */
+    padding-left: 50%;
+}
+
+/* 스크롤 애니메이션 */
 @keyframes scrollText {
     0% {
-        transform: translateX(100%); /* 오른쪽에서 시작 */
+        transform: translateX(100%);
     }
     100% {
-        transform: translateX(-100%); /* 왼쪽으로 이동 */
+        transform: translateX(-100%);
     }
 }
 
-/* 투명도 애니메이션 정의 */
+/* 양 끝에서 부드럽게 투명해지는 애니메이션 */
 @keyframes fadeText {
-    0%, 100% {
-        opacity: 0; /* 처음과 끝에는 투명 */
+    0%, 10% {
+        opacity: 0; /* 시작 지점에서 투명 */
     }
-    10% {
-        opacity: 1; /* 중앙에서 완전히 보임 */
+    20%, 80% {
+        opacity: 1; /* 중앙에서는 완전히 보임 */
     }
-    90% {
-        opacity: 1; /* 중앙에서 완전히 보임 */
+    90%, 100% {
+        opacity: 0; /* 끝 지점에서 투명 */
     }
+}
+
+/* 이벤트의 양 끝에 자연스럽게 사라지는 효과 추가 */
+.fc-event-main::before,
+.fc-event-main::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 30px; /* 양 끝 투명 영역 너비 */
+    pointer-events: none; /* 클릭 방지 */
+    z-index: 1;
+}
+
+.fc-event-main::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+.fc-event-main::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
 }
