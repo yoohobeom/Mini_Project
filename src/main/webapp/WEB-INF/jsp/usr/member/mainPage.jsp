@@ -474,6 +474,7 @@
             data: JSON.stringify(updatedEvent),
             success: function () {
                 alert("일정이 수정되었습니다.");
+                console.log(JSON.stringify(updatedEvent)); // 전송 데이터 출력
             },
             error: function () {
                 alert("일정을 수정하는 데 실패했습니다.");
