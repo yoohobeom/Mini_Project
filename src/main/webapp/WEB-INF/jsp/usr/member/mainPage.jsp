@@ -198,6 +198,7 @@
 			$.get("/api/events/search", { start: info.startStr, end: info.endStr })
 				.done(data => {
 					const events = data.map(event => ({
+						id : event.id, // 아이디 필드
 						title: event.title || "제목 없음", // 제목 기본값 설정
 						start: event.start,
 	                    end: event.end || null, // 종료 시간 없는 경우 처리
@@ -455,15 +456,19 @@
 	    });
 	});
 	
+	function formatDateForMysql(dateString) {
+	    const date = new Date(dateString);
+	    return date.toISOString().slice(0, 19).replace('T', ' ');
+	}
+
 	// 이벤트 Drag&Drop방식 수정
     function handleEventDrop(info) {
 		
-		console.log(info.event.start.toISOString());
         const updatedEvent = {
             id: info.event.id,
             title: info.event.title, // 제목 유지
-            start: info.event.start.toISOString(), // 새로운 시작 시간
-            end: info.event.end ? info.event.end.toISOString() : null, // 새로운 종료 시간
+            start: formatDateForMysql(info.event.start), // 새로운 시작 시간
+            end: formatDateForMysql(info.event.end), // 새로운 종료 시간
         };
         
         // AJAX로 서버에 변경된 이벤트 정보 전송
@@ -474,7 +479,7 @@
             data: JSON.stringify(updatedEvent),
             success: function () {
                 alert("일정이 수정되었습니다.");
-                console.log(JSON.stringify(updatedEvent)); // 전송 데이터 출력
+                console.log(updatedEvent); // 전송 데이터 출력
             },
             error: function () {
                 alert("일정을 수정하는 데 실패했습니다.");
