@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,14 +39,15 @@ public class UsrCalendarEventController {
     }
 
     // 특정 ID로 이벤트 조회
-    @GetMapping("/{id}")
+    @GetMapping("/id")
     @ResponseBody
-    public CalendarEvent getEventById(@PathVariable int id) {
+    public CalendarEvent getEventById(@RequestParam("id") int id) {
+    	System.out.println(id);
         return calendarEventsService.getEventById(id);
     }
 
     // 기존 이벤트 업데이트
-    @PutMapping("/update")
+    @PostMapping("/update")
     @ResponseBody
     public String updateEvent(@RequestBody CalendarEvent event) {
         calendarEventsService.updateEvent(event);

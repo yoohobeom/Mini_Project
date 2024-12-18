@@ -141,7 +141,13 @@
 	        }
 	        // 일정 수정 버튼
 	        if (target.id === "edit-event") {
-	            alert("수정 기능은 아직 구현되지 않았습니다.");
+	            const selectedIds = getSelectedEventIds();
+	            if (selectedIds.length !== 1) {
+	                alert("수정할 일정을 하나만 선택하세요.");
+	                return;
+	            }
+	            const eventId = selectedIds[0];
+	            openEditEventModal(eventId);
 	        }
 
 	        // 일정 삭제 버튼
@@ -183,9 +189,11 @@
 			moreLinkClick: "popover",
 			events: fetchEvents,
 			select: handleDateSelect,
+			eventDrop: handleEventDrop, // 드래그 앤 드롭 이벤트 핸들러 추가
 		});
 			calendar.render();
-	
+		
+		// 이벤트 가져오기
 		function fetchEvents(info, successCallback, failureCallback) {
 			$.get("/api/events/search", { start: info.startStr, end: info.endStr })
 				.done(data => {
@@ -205,7 +213,7 @@
 				});
 		}
 	
-		// 날짜 선택
+		// 날짜 클릭
 		function handleDateSelect(info) {
 		    // 버튼 활성화
 		    enableButtons();
@@ -280,7 +288,7 @@
 	            	    listHTML += `</div>`;
 	            	    content.innerHTML = listHTML;
 
-	            	    // 카드 클릭 이벤트 연결
+	            	    // 상세보기 카드 클릭 이벤트 연결
 	            	    document.querySelectorAll(".grid > div").forEach(card => {
 	            	        card.addEventListener("click", function (event) {
 	            	            // 체크박스 클릭 시 이벤트 중단
@@ -295,9 +303,9 @@
 
 	            	            // 모달에 데이터 삽입
 	            	            document.getElementById("modal-title").innerText = modalTitle;
-	            	            document.getElementById("modal-start").innerHTML = `<strong>시작 시간:</strong> ${modalStart}`;
-	            	            document.getElementById("modal-end").innerHTML = `<strong>종료 시간:</strong> ${modalEnd}`;
-	            	            document.getElementById("modal-description").innerHTML = `<strong>설명:</strong> ${modalDescription}`;
+	            	            document.getElementById("modal-start").innerHTML = `<strong>시작 시간:</strong> \${modalStart}`;
+	            	            document.getElementById("modal-end").innerHTML = `<strong>종료 시간:</strong> \${modalEnd}`;
+	            	            document.getElementById("modal-description").innerHTML = `<strong>설명:</strong> \${modalDescription}`;
 
 	            	            // 모달 보이기
 	            	            document.getElementById("event-detail-modal").classList.remove("hidden");
@@ -349,7 +357,7 @@
 	}
 	
     // 일정 추가
-	// 모달 열기/닫기 기능
+	// 모달 열기
 	function openAddEventModal(startDate, endDate) {
 		 console.log("전달된 시작 날짜:", startDate); // 전달된 날짜 값 확인
 		 console.log("전달된 종료 날짜:", endDate); // 전달된 날짜 값 확인
@@ -358,6 +366,7 @@
 	    $("#add-modal").removeClass("hidden");
 	}
 	
+    //모달 닫기
 	function closeAddEventModal() {
 	    $("#add-modal").addClass("hidden");
 	}
@@ -393,8 +402,86 @@
 	    });
 	});
 
+	// 일정 수정
+	// 모달 열기
+	function openEditEventModal(eventId) {
+		
+	    $.ajax({
+	        url: "/api/events/id", // 일정 상세 조회 API
+	        method: "GET",
+	        data: { id : eventId },
+	        success: function (data) {
+	            $("#edit-event-title").val(data.title || "");
+	            $("#edit-event-start").val(data.start || "");
+	            $("#edit-event-end").val(data.end || "");
 
+	            $("#edit-modal").removeClass("hidden"); // 수정 모달 열기
+	        },
+	        error: function () {
+	            alert("일정 정보를 가져오는 데 실패했습니다.");
+	        },
+	    });
+	}
+
+	function closeEditEventModal() {
+	    $("#edit-modal").addClass("hidden"); // 수정 모달 닫기
+	}
+
+	$(document).ready(function () {
+	    $("#edit-event-form").on("submit", function (e) {
+	        e.preventDefault();
+
+	        const updatedEvent = {
+	            id: getSelectedEventIds()[0], // 선택된 일정 ID
+	            title: $("#edit-event-title").val(),
+	            start: $("#edit-event-start").val(),
+	            end: $("#edit-event-end").val(),
+	        };
+
+	        $.ajax({
+	            url: "/api/events/update", // 일정 수정 API
+	            method: "POST",
+	            contentType: "application/json",
+	            data: JSON.stringify(updatedEvent),
+	            success: function () {
+	                alert("일정이 수정되었습니다.");
+	                closeEditEventModal();
+	                location.reload(); // 새로고침하여 변경사항 반영
+	            },
+	            error: function () {
+	                alert("일정을 수정하는 데 실패했습니다.");
+	            },
+	        });
+	    });
+	});
 	
+	// 이벤트 Drag&Drop방식 수정
+    function handleEventDrop(info) {
+		
+		console.log(info.event.start.toISOString());
+        const updatedEvent = {
+            id: info.event.id,
+            title: info.event.title, // 제목 유지
+            start: info.event.start.toISOString(), // 새로운 시작 시간
+            end: info.event.end ? info.event.end.toISOString() : null, // 새로운 종료 시간
+        };
+        
+        // AJAX로 서버에 변경된 이벤트 정보 전송
+        $.ajax({
+            url: "/api/events/update",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(updatedEvent),
+            success: function () {
+                alert("일정이 수정되었습니다.");
+            },
+            error: function () {
+                alert("일정을 수정하는 데 실패했습니다.");
+                info.revert(); // 실패 시 드래그 이전 위치로 되돌리기
+            },
+        });
+    }
+    
 	// 일정 삭제 함수
 	function deleteEvents(eventIds) {
 		
@@ -548,6 +635,25 @@
     </div>
 </div>
 
+<!-- 일정 수정 모달 -->
+<div id="edit-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm p-6 rounded shadow-lg">
+        <h3 class="text-lg font-bold mb-4">일정 수정</h3>
+        <form id="edit-event-form">
+            <label for="edit-event-title">제목:</label>
+            <input type="text" id="edit-event-title" class="input input-bordered w-full mb-4" required />
+
+            <label for="edit-event-start">시작 시간:</label>
+            <input type="datetime-local" id="edit-event-start" class="input input-bordered w-full mb-4" required />
+
+            <label for="edit-event-end">종료 시간:</label>
+            <input type="datetime-local" id="edit-event-end" class="input input-bordered w-full mb-4" />
+
+            <button type="submit" class="btn btn-primary w-full">저장</button>
+            <button type="button" onclick="closeEditEventModal()" class="btn btn-secondary w-full mt-2">닫기</button>
+        </form>
+    </div>
+</div>
 
 <!-- 공유 설정 모달 -->
 <div id="share-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
