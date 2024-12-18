@@ -101,6 +101,11 @@ public class UsrMemberController {
 		return "usr/member/mainPage";
 	}
 	
+	@GetMapping("/usr/member/login")
+	public String login() {
+		return "usr/member/realLogin";
+	}
+	
 	@PostMapping("/usr/home/doLogin")
 	@ResponseBody
 	public String doLogin(HttpServletRequest req, String loginId, String loginPw) {

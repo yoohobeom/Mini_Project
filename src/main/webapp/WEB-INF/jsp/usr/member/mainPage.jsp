@@ -478,7 +478,6 @@
             contentType: "application/json",
             data: JSON.stringify(updatedEvent),
             success: function () {
-                alert("일정이 수정되었습니다.");
                 console.log(updatedEvent); // 전송 데이터 출력
             },
             error: function () {
@@ -576,10 +575,9 @@
 	</div>
 
 <!-- 캘린더 컨테이너 -->
-<div id="calendar-container" class="p-4 sm:ml-44">
+<div id="calendar-container" class="hidden sm:block p-4 sm:ml-44">
     <div id="calendar" class="shadow-lg rounded-lg overflow-hidden border border-gray-200"></div>
 </div>
-
 <!-- 일정 상세 정보 -->
 <div id="schedule-details" class="p-4 sm:ml-44 sm:mr-44 mt-20 bg-white border border-gray-200 shadow-lg rounded-lg">
     <div class="flex justify-between items-center mb-4">
