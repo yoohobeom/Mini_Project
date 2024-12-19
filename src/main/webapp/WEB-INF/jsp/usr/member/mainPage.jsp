@@ -204,7 +204,7 @@
 					const events = data.map(event => ({
 						id : event.id, // 아이디 필드
 						owner : event.owner || "알 수 없음",
-						ownerId : event.owner_Id || "알 수 없음",
+						ownerId : event.ownerId || "알 수 없음",
 						title: event.title || "제목 없음", // 제목 기본값 설정
 						start: event.start,
 	                    end: event.end || null, // 종료 시간 없는 경우 처리
@@ -260,7 +260,7 @@
 	            	    `;
 	            	    data.forEach(event => {
 	            	        const title = event.title || "제목 없음";
-	            	        const ownerName = event.ownerName || "익명";
+	            	        const ownerName = event.owner || "익명";
 	            	        const start = event.start || "시작 시간 없음";
 	            	        const end = event.end || "종료 시간 없음";
 	            	        const description = event.description || "설명 없음";

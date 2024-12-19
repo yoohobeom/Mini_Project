@@ -65,7 +65,7 @@ public interface CalendarEventsDao {
 
     // 특정 날짜 범위의 이벤트 검색
     @Select("""
-            SELECT e.*, c.name AS category_name, m.name AS owner_name
+            SELECT e.*, c.name AS category_name, m.name AS owner_name, m.id AS ownerId
             FROM calendar_events e
             LEFT JOIN categories c ON e.category_id = c.id
             LEFT JOIN member m ON e.owner_id = m.id
