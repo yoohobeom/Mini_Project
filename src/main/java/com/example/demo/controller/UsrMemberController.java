@@ -63,7 +63,11 @@ public class UsrMemberController {
 	        @RequestParam(defaultValue = "1") int cPage,
 	        @RequestParam(defaultValue = "title") String searchType,
 	        @RequestParam(defaultValue = "") String searchKeyword,
-	        Model model) {
+	        HttpServletRequest req, Model model) {
+		
+		Rq rq = (Rq) req.getAttribute("rq");
+		
+		String loginedMemberName = memberService.getMemberNameByLoginId(rq.getLoginedMemberId());
 
 	    int limitFrom = (cPage - 1) * 10;
 
@@ -97,7 +101,8 @@ public class UsrMemberController {
 	    model.addAttribute("cPage", cPage);
 	    model.addAttribute("searchType", searchType);
 	    model.addAttribute("searchKeyword", searchKeyword);
-		
+		model.addAttribute("loginedMemberName", loginedMemberName);
+	    
 		return "usr/member/mainPage";
 	}
 	

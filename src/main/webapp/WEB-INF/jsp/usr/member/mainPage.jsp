@@ -117,6 +117,7 @@
  
     let selectedDate = null; // 선택된 날짜를 저장하는 전역 변수
     let selectedEndDate = null;    // 선택된 종료 날짜 (전역 변수)
+    let ownerName = "${loginedMemberName}"; // 로그인 멤버 저장 전역변수
     
 	document.addEventListener("DOMContentLoaded", function () {
 		initCalendar();
@@ -133,7 +134,8 @@
 	            if (selectedDate) {
 	                const formattedDate = `\${selectedDate}T00:00`;
 	                const formattedEndDate = `\${selectedEndDate}T23:59`;
-	                openAddEventModal(formattedDate, formattedEndDate);
+	                const useOwnerName = `\${ownerName}`;
+	                openAddEventModal(formattedDate, formattedEndDate, useOwnerName);
 	            } else {
 	                alert("날짜를 먼저 선택해주세요.");
 	                console.log(selectedDate);
@@ -199,6 +201,7 @@
 				.done(data => {
 					const events = data.map(event => ({
 						id : event.id, // 아이디 필드
+						ownerName : event.ownerName || "알 수 없음",
 						title: event.title || "제목 없음", // 제목 기본값 설정
 						start: event.start,
 	                    end: event.end || null, // 종료 시간 없는 경우 처리
@@ -254,6 +257,7 @@
 	            	    `;
 	            	    data.forEach(event => {
 	            	        const title = event.title || "제목 없음";
+	            	        const ownerName = event.ownerName || "익명";
 	            	        const start = event.start || "시작 시간 없음";
 	            	        const end = event.end || "종료 시간 없음";
 	            	        const description = event.description || "설명 없음";
@@ -261,6 +265,7 @@
 	            	        listHTML += `
 	            	            <div class="bg-white border-l-4 border-blue-500 shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer"
 	            	                 data-title="\${title}" 
+	            	                 data-ownerName="\${ownerName}"
 	            	                 data-start="\${start}" 
 	            	                 data-end="\${end}" 
 	            	                 data-description="\${description}">
@@ -298,12 +303,14 @@
 	            	            }
 	            	        	
 	            	            const modalTitle = this.getAttribute("data-title");
+	            	            const modalOwner = this.getAttribute("data-OwnerName");
 	            	            const modalStart = this.getAttribute("data-start");
 	            	            const modalEnd = this.getAttribute("data-end");
 	            	            const modalDescription = this.getAttribute("data-description");
 
 	            	            // 모달에 데이터 삽입
 	            	            document.getElementById("modal-title").innerText = modalTitle;
+	            	            document.getElementById("modal-owner").innerHTML = `<strong>작성자:</strong> \${modalOwner}`;
 	            	            document.getElementById("modal-start").innerHTML = `<strong>시작 시간:</strong> \${modalStart}`;
 	            	            document.getElementById("modal-end").innerHTML = `<strong>종료 시간:</strong> \${modalEnd}`;
 	            	            document.getElementById("modal-description").innerHTML = `<strong>설명:</strong> \${modalDescription}`;
@@ -359,11 +366,10 @@
 	
     // 일정 추가
 	// 모달 열기
-	function openAddEventModal(startDate, endDate) {
-		 console.log("전달된 시작 날짜:", startDate); // 전달된 날짜 값 확인
-		 console.log("전달된 종료 날짜:", endDate); // 전달된 날짜 값 확인
+	function openAddEventModal(startDate, endDate, ownerName) {
 	    $("#add-event-start").val(startDate); // 시작 날짜 자동 설정
 	   	$("#add-event-end").val(endDate);   // 종료 날짜 기본값 설정
+	   	$("#add-event-owner").val(ownerName);   // 작성자 값
 	    $("#add-modal").removeClass("hidden");
 	}
 	
@@ -381,8 +387,10 @@
 	        // 폼 데이터 확인
 	        const newEvent = {
 	            title: $("#add-event-title").val(),
+	            owner: $("#add-event-owner").val(),
 	            start: $("#add-event-start").val(),
 	            end: $("#add-event-end").val() || $("#add-event-start").val(),
+	            description: $("#add-event-description").val(),
 	        };
 	        console.log("전송할 데이터:", newEvent);
 
@@ -415,7 +423,8 @@
 	            $("#edit-event-title").val(data.title || "");
 	            $("#edit-event-start").val(data.start || "");
 	            $("#edit-event-end").val(data.end || "");
-
+	            $("#edit-event-description").val(data.description || "");
+	            
 	            $("#edit-modal").removeClass("hidden"); // 수정 모달 열기
 	        },
 	        error: function () {
@@ -437,6 +446,7 @@
 	            title: $("#edit-event-title").val(),
 	            start: $("#edit-event-start").val(),
 	            end: $("#edit-event-end").val(),
+	            description: $("#edit-event-description").val(),
 	        };
 
 	        $.ajax({
@@ -558,19 +568,14 @@
 		</label>		
 		<div class="grow"></div>
 		<ul class="flex">
-<%-- 			<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/">HOME</a></li> --%>
-<%-- 			<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/article/list?boardId=1">NOTICE</a></li> --%>
-<%-- 			<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/article/list?boardId=2">FREE</a></li> --%>
 			<c:if test="${rq.getLoginedMemberId() == -1 }">
 				<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/member/join">JOIN</a></li>
 				<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/member/login">LOGIN</a></li>
 			</c:if>
 			<c:if test="${rq.getLoginedMemberId() != -1 }">
-<%-- 				<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/member/myPage">MYPAGE</a></li> --%>
+				<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/member/myPage">MYPAGE</a></li>
 				<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/member/doLogout">LOGOUT</a></li>
 			</c:if>
-<%-- 			<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/home/apiTest1">APITEST1</a></li> --%>
-<%-- 			<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/home/apiTest2">APITEST2</a></li> --%>
 		</ul>
 	</div>
 
@@ -610,6 +615,7 @@
 <div id="event-detail-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
     <div class="bg-white w-80 md:w-96 p-6 rounded-lg shadow-lg">
         <h4 id="modal-title" class="text-lg font-bold mb-4"></h4>
+        <p id="modal-owner" class="text-gray-600 mb-2"></p>
         <p id="modal-start" class="text-gray-600 mb-2"></p>
         <p id="modal-end" class="text-gray-600 mb-2"></p>
         <p id="modal-description" class="text-gray-700 mb-4"></p>
@@ -626,12 +632,18 @@
         <form id="add-event-form">
             <label for="add-event-title">제목:</label>
             <input type="text" id="add-event-title" class="input input-bordered w-full mb-4" required />
+            
+            <label for="add-event-owner">작성자:</label>
+			<input type="text" id="add-event-owner" class="input input-bordered w-full mb-4" readonly />
 
             <label for="add-event-start">시작 시간:</label>
             <input type="datetime-local" id="add-event-start" class="input input-bordered w-full mb-4" required />
 
             <label for="add-event-end">종료 시간:</label>
             <input type="datetime-local" id="add-event-end" class="input input-bordered w-full mb-4" />
+            
+            <label for="add-event-description">설명:</label>
+            <input type="text" id="add-event-description" class="input input-bordered w-full mb-4" />
 
             <button type="submit" class="btn btn-primary w-full">저장</button>
             <button type="button" onclick="closeAddEventModal()" class="btn btn-secondary w-full mt-2">닫기</button>
@@ -646,13 +658,19 @@
         <form id="edit-event-form">
             <label for="edit-event-title">제목:</label>
             <input type="text" id="edit-event-title" class="input input-bordered w-full mb-4" required />
+            
+            <label for="edit-event-owner">작성자:</label>
+			<input type="text" id="edit-event-owner" class="input input-bordered w-full mb-4" readonly />
 
             <label for="edit-event-start">시작 시간:</label>
             <input type="datetime-local" id="edit-event-start" class="input input-bordered w-full mb-4" required />
 
             <label for="edit-event-end">종료 시간:</label>
             <input type="datetime-local" id="edit-event-end" class="input input-bordered w-full mb-4" />
-
+            
+			<label for="edit-event-description">설명:</label>
+            <input type="text" id="edit-event-description" class="input input-bordered w-full mb-4" />
+            
             <button type="submit" class="btn btn-primary w-full">저장</button>
             <button type="button" onclick="closeEditEventModal()" class="btn btn-secondary w-full mt-2">닫기</button>
         </form>
@@ -678,8 +696,15 @@
 <!-- 게시글 리스트 -->
 <section class="mt-8">
     <div class="container mx-auto">
+    	<h2>게시글 목록</h2>
         <div class="w-full mb-4 pl-3 text-sm flex justify-between items-end">
             <div>총 : ${articlesCnt}개</div>
+            
+            <c:if test="${rq.getLoginedMemberId() != -1 }">
+			<div class="w-9/12 mx-auto flex justify-end my-3">
+				<a class="btn btn-active btn-sm" href="../article/write">글쓰기</a>
+			</div>
+			</c:if>
             <form class="flex items-center">
                 <select class="select select-bordered select-sm mr-2" name="searchType">
                     <option value="title" <c:if test="${searchType == 'title'}">selected</c:if>>제목</option>
@@ -708,7 +733,7 @@
                     <c:forEach var="article" items="${articles}">
                         <tr>
                             <td>${article.id}</td>
-                            <td><a href="detail?id=${article.id}">${article.title}</a></td>
+                            <td><a href="../article/detail?id=${article.id}">${article.title}</a></td>
                             <td>${article.loginId}</td>
                             <td>${article.regDate.substring(0, 10)}</td>
                             <td>${article.views}</td>

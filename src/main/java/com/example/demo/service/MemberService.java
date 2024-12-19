@@ -33,4 +33,8 @@ public class MemberService {
 	public void modifyPassword(int loginedMemberId, String loginPw) {
 		memberDao.modifyPassword(loginedMemberId, loginPw);
 	}
+
+	public String getMemberNameByLoginId(int loginedMemberId) {
+		return memberDao.getMemberNameByLoginId(loginedMemberId);
+	}
 }
