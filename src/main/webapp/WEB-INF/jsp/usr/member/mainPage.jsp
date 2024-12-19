@@ -203,7 +203,8 @@
 				.done(data => {
 					const events = data.map(event => ({
 						id : event.id, // 아이디 필드
-						ownerName : event.ownerName || "알 수 없음",
+						owner : event.owner || "알 수 없음",
+						ownerId : event.owner_Id || "알 수 없음",
 						title: event.title || "제목 없음", // 제목 기본값 설정
 						start: event.start,
 	                    end: event.end || null, // 종료 시간 없는 경우 처리
