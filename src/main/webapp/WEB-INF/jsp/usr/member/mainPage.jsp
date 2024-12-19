@@ -118,6 +118,7 @@
     let selectedDate = null; // 선택된 날짜를 저장하는 전역 변수
     let selectedEndDate = null;    // 선택된 종료 날짜 (전역 변수)
     let ownerName = "${loginedMemberName}"; // 로그인 멤버 저장 전역변수
+    let memberId = "${rq.getLoginedMemberId()}"
     
 	document.addEventListener("DOMContentLoaded", function () {
 		initCalendar();
@@ -135,7 +136,8 @@
 	                const formattedDate = `\${selectedDate}T00:00`;
 	                const formattedEndDate = `\${selectedEndDate}T23:59`;
 	                const useOwnerName = `\${ownerName}`;
-	                openAddEventModal(formattedDate, formattedEndDate, useOwnerName);
+	                const userId = `\${memberId}`;
+	                openAddEventModal(formattedDate, formattedEndDate, useOwnerName, userId);
 	            } else {
 	                alert("날짜를 먼저 선택해주세요.");
 	                console.log(selectedDate);
@@ -366,10 +368,11 @@
 	
     // 일정 추가
 	// 모달 열기
-	function openAddEventModal(startDate, endDate, ownerName) {
+	function openAddEventModal(startDate, endDate, ownerName, ownerId) {
 	    $("#add-event-start").val(startDate); // 시작 날짜 자동 설정
 	   	$("#add-event-end").val(endDate);   // 종료 날짜 기본값 설정
 	   	$("#add-event-owner").val(ownerName);   // 작성자 값
+	   	$("#add-event-ownerId").val(ownerId);   // 작성자 키값
 	    $("#add-modal").removeClass("hidden");
 	}
 	
@@ -387,7 +390,7 @@
 	        // 폼 데이터 확인
 	        const newEvent = {
 	            title: $("#add-event-title").val(),
-	            owner: $("#add-event-owner").val(),
+	            ownerId: $("#add-event-ownerId").val(),
 	            start: $("#add-event-start").val(),
 	            end: $("#add-event-end").val() || $("#add-event-start").val(),
 	            description: $("#add-event-description").val(),
@@ -632,6 +635,8 @@
         <form id="add-event-form">
             <label for="add-event-title">제목:</label>
             <input type="text" id="add-event-title" class="input input-bordered w-full mb-4" required />
+            
+            <input type="text" id="add-event-ownerId" class="input input-bordered w-full mb-4" hidden />
             
             <label for="add-event-owner">작성자:</label>
 			<input type="text" id="add-event-owner" class="input input-bordered w-full mb-4" readonly />

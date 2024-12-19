@@ -20,8 +20,8 @@ public class CalendarEvent {
     private String color;
     private int categoryId; // 기존 category를 정규화
     private int recurrenceId; // 반복 규칙
-    private int ownerId; // 소유자
-    private String ownerName;    // 소유자 이름
+    private int ownerId; // 작성자 고유번호
+    private String owner; // 작성자 이름
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String status;
