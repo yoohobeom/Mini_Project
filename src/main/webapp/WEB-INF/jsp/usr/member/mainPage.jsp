@@ -620,7 +620,7 @@
 </div>
 
 <!-- 일정 추가 모달 -->
-<div id="add-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
+<div id="add-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
     <div class="bg-white w-full max-w-sm p-6 rounded shadow-lg">
         <h3 class="text-lg font-bold mb-4">일정 추가</h3>
         <form id="add-event-form">
@@ -640,7 +640,7 @@
 </div>
 
 <!-- 일정 수정 모달 -->
-<div id="edit-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
+<div id="edit-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
     <div class="bg-white w-full max-w-sm p-6 rounded shadow-lg">
         <h3 class="text-lg font-bold mb-4">일정 수정</h3>
         <form id="edit-event-form">
@@ -660,7 +660,7 @@
 </div>
 
 <!-- 공유 설정 모달 -->
-<div id="share-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+<div id="share-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded shadow-lg">
         <h3 class="text-lg font-bold mb-4">일정 공유</h3>
         <label for="share-user">공유 대상:</label>
