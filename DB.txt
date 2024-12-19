@@ -203,22 +203,7 @@ SELECT NOW()
         , FLOOR(RAND() * 3) + 1
         , CONCAT('제목_', FLOOR(RAND() * 10000))
         , CONCAT('내용_', FLOOR(RAND() * 10000))
-    FROM article;
-    
-
-
-CREATE TABLE `calendar_events` (
-    `id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    `title` VARCHAR(255) NOT NULL,
-    `description` TEXT,
-    `start` DATETIME NOT NULL,
-    `end` DATETIME,
-    `all_day` TINYINT(1) DEFAULT 0,
-    `category_id` INT UNSIGNED, -- 카테고리 참조
-    `owner_id` INT UNSIGNED, -- 사용자 참조
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+    FROM article;   
 
 SELECT * FROM `calendar_events`
 	WHERE id = '6'
@@ -232,3 +217,13 @@ UPDATE `calendar_events`
 	SET `start` = '2024-12-09 09:00:00'
 		, `end` = '2024-12-13 09:00:00'
 	
+            SELECT e.*, c.name AS category_name, m.name AS owner_name
+            FROM calendar_events e
+            LEFT JOIN categories c ON e.category_id = c.id
+            LEFT JOIN MEMBER m ON e.owner_id = m.id
+            WHERE e.start < '2024-12-09 09:00:00' AND e.end > '2024-12-13 09:00:00'
+            
+            SELECT e.*, m.name AS owner_name 
+				FROM calendar_events e
+				LEFT JOIN MEMBER m ON e.owner_id = m.id
+				WHERE e.start < #{end} AND e.end > #{start}
