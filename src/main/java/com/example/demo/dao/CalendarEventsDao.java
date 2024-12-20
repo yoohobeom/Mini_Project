@@ -54,22 +54,50 @@ public interface CalendarEventsDao {
 
     // 이벤트 삭제
     @Delete("""
-    	<script>
-        DELETE FROM calendar_events WHERE id IN
-        <foreach collection='ids' item='id' open='(' separator=',' close=')'>
-        #{id}
-        </foreach>
-        </script>
-        """)
+	    	<script>
+	        DELETE FROM calendar_events WHERE id IN
+	        <foreach collection='ids' item='id' open='(' separator=',' close=')'>
+	        #{id}
+	        </foreach>
+	        </script>
+    		""")
     void deleteEvent(List<Integer> ids);
 
     // 특정 날짜 범위의 이벤트 검색
     @Select("""
-            SELECT e.*, c.name AS category_name, m.name AS owner_name, m.id AS ownerId
-            FROM calendar_events e
-            LEFT JOIN categories c ON e.category_id = c.id
-            LEFT JOIN member m ON e.owner_id = m.id
-            WHERE e.start < #{end} AND e.end > #{start}
+			SELECT e.*, c.name AS category_name, m.name AS owner_name
+				FROM calendar_events e
+				LEFT JOIN categories c ON e.category_id = c.id
+				LEFT JOIN member m ON e.owner_id = m.id
+				WHERE (e.owner_id = #{loginedMemberId} OR e.id IN (
+				    SELECT event_id
+				    FROM event_shares
+				    WHERE shared_with_user_id = #{loginedMemberId}
+				))
+				AND e.start < #{end} AND e.end > #{start};
             """)
-    List<CalendarEvent> searchEvents(@Param("start") String start, @Param("end") String end);
+    List<CalendarEvent> searchEvents(int loginedMemberId, @Param("start") String start, @Param("end") String end);
+
+    // 이벤트 공유 추가
+    @Insert("""
+    		INSERT INTO event_shares (event_id, shared_user_id, permission)
+    			VALUES (#{eventId}, #{sharedUserId}, #{permission})
+    		""")
+	void addShare(@Param("eventId") int eventId, @Param("sharedUserId") int sharedUserId, @Param("permission") String permission);
+    
+    // 일정 공유 조회
+    @Select("""
+    		SELECT permission
+    			FROM event_shares
+    			WHERE event_id = #{eventId}
+    			AND shared_user_id = #{userId}
+    		""")
+    String getUserPermission(@Param("userId") int userId, @Param("eventId") int eventId);
+    
+    @Delete("""
+    		DELETE FROM calendar_events
+    			WHERE id = #{eventId}
+    		""")
+	void deleteShareEvent(@Param("eventId") int eventId);
+
 }

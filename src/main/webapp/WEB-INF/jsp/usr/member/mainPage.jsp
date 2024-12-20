@@ -23,69 +23,9 @@
 <title>유저 메인</title>
 
 <script>
-// 	function initShareFeature() {
-// 	    const shareButton = document.getElementById("share-button");
-// 	    const shareModal = document.getElementById("share-modal");
-// 	    const closeShareButton = document.getElementById("close-share");
-// 	    const confirmShareButton = document.getElementById("confirm-share");
-	
-// 	    // 공유 버튼 클릭 시 모달 표시
-// 	    shareButton.addEventListener("click", function () {
-// 	        shareModal.classList.remove("hidden");
-// 	    });
-	
-// 	    // 모달 닫기
-// 	    closeShareButton.addEventListener("click", function () {
-// 	        shareModal.classList.add("hidden");
-// 	    });
-	
-// 	    // 공유하기 버튼 클릭 시 처리
-// 	    confirmShareButton.addEventListener("click", function () {
-// 	        const eventTitle = document.getElementById("event-title").value;
-// 	        const shareUser = document.getElementById("share-user").value;
-// 	        const permission = document.getElementById("share-permission").value;
-	
-// 	        if (!shareUser) {
-// 	            alert("공유 대상을 입력해주세요.");
-// 	            return;
-// 	        }
-	
-// 	        // WebSocket을 통해 공유 요청 전송
-// 	        sendShareEvent({
-// 	            action: "share",
-// 	            eventTitle: eventTitle,
-// 	            sharedWith: shareUser,
-// 	            permission: permission,
-// 	        });
-	
-// 	        alert(`"${eventTitle}" 일정이 ${shareUser}에게 공유되었습니다.`);
-// 	        shareModal.classList.add("hidden");
-// 	    });
-// 	}
-
-// 	// WebSocket으로 공유 이벤트 전송
-// 	function sendShareEvent(shareData) {
-// 	    const socket = new SockJS("/ws"); // WebSocket 연결
-// 	    const stompClient = StompJs.Stomp.over(socket); // Stomp 클라이언트 생성
-	
-// 	    // WebSocket 연결 및 메시지 전송
-// 	    stompClient.connect({}, function () {
-// 	        console.log("WebSocket Connected");
-	
-// 	        stompClient.send(
-// 	            "/app/share-event", // 서버의 WebSocket 핸들러
-// 	            {},
-// 	            JSON.stringify(shareData) // 공유 데이터 전송
-// 	        );
-// 	    }, function (error) {
-// 	        console.error("WebSocket Connection Failed:", error);
-// 	    });
-// 	}
-
-
         // WebSocket 초기화
         const socket = new SockJS("/ws");
-        const stompClient = StompJs.Stomp.over(socket);
+        const stompClient = StompJs.Stomp.over(() => socket); // 팩토리 함수로 전달	
 
         stompClient.connect({}, function () {
             console.log("WebSocket Connected");
@@ -112,7 +52,7 @@
                 JSON.stringify(shareData)
             );
 
-            alert(`선택된 일정이 ${shareUser}에게 공유되었습니다.`);
+            alert(`선택된 일정이 \${shareUser}에게 공유되었습니다.`);
         }
  
     let selectedDate = null; // 선택된 날짜를 저장하는 전역 변수
@@ -168,16 +108,15 @@
 
 	        // 일정 공유 버튼
 	        else if (target.id === "share-events") {
+	        	
 	            const selectedIds = getSelectedEventIds();
+	            
 	            if (selectedIds.length === 0) {
 	                alert("공유할 일정을 선택하세요.");
 	                return;
 	            }
-	            const shareUser = prompt("공유할 사용자 ID를 입력하세요:");
-	            if (shareUser) {
-	                shareEventsWebSocket(selectedIds, shareUser);
+	            	openShareModal(selectedIds); // 모달 열기
 	            }
-	        }
 	    });
 	});
 	
@@ -202,9 +141,9 @@
 			$.get("/api/events/search", { start: info.startStr, end: info.endStr })
 				.done(data => {
 					const events = data.map(event => ({
-						id : event.id, // 아이디 필드
-						owner : event.owner || "알 수 없음",
-						ownerId : event.ownerId || "알 수 없음",
+						id: event.id, // 아이디 필드
+						owner: event.owner || "알 수 없음",
+						ownerId: event.ownerId || "알 수 없음",
 						title: event.title || "제목 없음", // 제목 기본값 설정
 						start: event.start,
 	                    end: event.end || null, // 종료 시간 없는 경우 처리
@@ -248,6 +187,7 @@
 	        	data: {
 	            	start: info.startStr, // 시작 날짜
 	            	end: info.endStr,       // 종료 날짜
+	            	userId: memberId,
 	        	},
 	        	success: function (data) {
 	            	console.log("Fetched Data:", data); // 디버깅용
@@ -501,6 +441,17 @@
         });
     }
     
+	// 일정 공유
+    function openShareModal(eventIds) {
+        // 선택된 일정 ID를 숨겨진 필드에 저장
+        $("#share-event-ids").val(eventIds.join(","));
+        $("#share-modal").removeClass("hidden"); // 모달 표시
+    }
+
+    function closeShareModal() {
+        $("#share-modal").addClass("hidden"); // 모달 숨기기
+    }
+	
 	// 일정 삭제 함수
 	function deleteEvents(eventIds) {
 		
@@ -683,19 +634,26 @@
     </div>
 </div>
 
-<!-- 공유 설정 모달 -->
+<!-- 공유 기능 모달 -->
 <div id="share-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-    <div class="bg-white p-6 rounded shadow-lg">
+    <div class="bg-white w-full max-w-sm p-6 rounded shadow-lg">
         <h3 class="text-lg font-bold mb-4">일정 공유</h3>
-        <label for="share-user">공유 대상:</label>
-        <input type="text" id="share-user" class="input input-bordered w-full mb-4" placeholder="사용자 ID 또는 그룹 입력" />
-        <label for="share-permission">권한:</label>
-        <select id="share-permission" class="select select-bordered w-full mb-4">
-            <option value="view">보기</option>
-            <option value="edit">수정</option>
-        </select>
-        <button id="confirm-share" class="btn btn-primary w-full">공유하기</button>
-        <button id="close-share" class="btn btn-secondary w-full mt-2">닫기</button>
+        <form id="share-event-form">
+            <!-- 숨겨진 필드에 선택된 일정 ID 저장 -->
+            <input type="hidden" id="share-event-ids" />
+            
+            <label for="share-user">공유 대상:</label>
+            <input type="text" id="share-user" class="input input-bordered w-full mb-4" placeholder="사용자 ID 입력" required />
+            
+            <label for="share-permission">권한:</label>
+            <select id="share-permission" class="select select-bordered w-full mb-4">
+                <option value="view">보기</option>
+                <option value="edit">수정</option>
+            </select>
+            
+            <button type="submit" class="btn btn-primary w-full">공유하기</button>
+            <button type="button" onclick="closeShareModal()" class="btn btn-secondary w-full mt-2">닫기</button>
+        </form>
     </div>
 </div>
 
