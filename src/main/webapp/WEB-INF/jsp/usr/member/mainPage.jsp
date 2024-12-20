@@ -33,17 +33,18 @@
             console.error("WebSocket Connection Failed:", error);
         });
 
-        // WebSocket을 통해 공유 데이터 전송
-        function shareEventsWebSocket(eventIds, shareUser) {
-            if (!stompClient.connected) {
+        // WebSocket 공유 함수
+        function shareEventsWebSocket(eventIds, shareUser, permission) {
+            if (!stompClient || !stompClient.connected) {
                 alert("WebSocket 연결이 끊어졌습니다. 다시 시도해주세요.");
                 return;
             }
 
             const shareData = {
                 action: "share",
-                eventIds: eventIds,
-                sharedWith: shareUser,
+                eventIds: eventIds, // 이벤트ID
+                sharedWith: shareUser, // 유저
+                permission: permission, // 권한 정보 추가
             };
 
             stompClient.send(
@@ -52,7 +53,7 @@
                 JSON.stringify(shareData)
             );
 
-            alert(`선택된 일정이 \${shareUser}에게 공유되었습니다.`);
+            alert(`선택된 일정이 \${shareUser}에게 공유되었습니다. (권한: \${permission})`);
         }
  
     let selectedDate = null; // 선택된 날짜를 저장하는 전역 변수
@@ -143,7 +144,7 @@
 					const events = data.map(event => ({
 						id: event.id, // 아이디 필드
 						owner: event.owner || "알 수 없음",
-						ownerId: event.ownerId || "알 수 없음",
+						ownerId: event.owner_id || "알 수 없음",
 						title: event.title || "제목 없음", // 제목 기본값 설정
 						start: event.start,
 	                    end: event.end || null, // 종료 시간 없는 경우 처리
@@ -451,6 +452,21 @@
     function closeShareModal() {
         $("#share-modal").addClass("hidden"); // 모달 숨기기
     }
+    
+    // 공유 폼 제출 처리
+    document.getElementById("share-event-form").addEventListener("submit", function (e) {
+        e.preventDefault(); // 기본 폼 제출 방지
+        // 폼 데이터 수집
+        const eventIds = document.getElementById("share-event-ids").value.split(",");
+        const shareUser = document.getElementById("share-user").value;
+        const sharePermission = document.getElementById("share-permission").value;
+
+        // WebSocket 공유 함수 호출
+        shareEventsWebSocket(eventIds, shareUser, sharePermission);
+
+        // 모달 닫기
+        closeShareModal();
+    });
 	
 	// 일정 삭제 함수
 	function deleteEvents(eventIds) {
