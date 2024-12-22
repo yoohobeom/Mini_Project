@@ -144,7 +144,7 @@
 					const events = data.map(event => ({
 						id: event.id, // 아이디 필드
 						owner: event.owner || "알 수 없음",
-						ownerId: event.owner_id || "알 수 없음",
+						ownerId: event.ownerId || "알 수 없음",
 						title: event.title || "제목 없음", // 제목 기본값 설정
 						start: event.start,
 	                    end: event.end || null, // 종료 시간 없는 경우 처리
@@ -676,12 +676,11 @@
 <!-- 게시글 리스트 -->
 <section class="mt-8">
     <div class="container mx-auto">
-    	<h2>게시글 목록</h2>
+    	<h1>게시글 목록</h1>
         <div class="w-full mb-4 pl-3 text-sm flex justify-between items-end">
-            <div>총 : ${articlesCnt}개</div>
             
             <c:if test="${rq.getLoginedMemberId() != -1 }">
-			<div class="w-9/12 mx-auto flex justify-end my-3">
+			<div class="w-9/12 flex justify-end mr-2">
 				<a class="btn btn-active btn-sm" href="../article/write">글쓰기</a>
 			</div>
 			</c:if>
