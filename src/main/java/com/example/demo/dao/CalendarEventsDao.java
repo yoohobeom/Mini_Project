@@ -19,7 +19,7 @@ public interface CalendarEventsDao {
             INSERT INTO calendar_events
             (title, description, start, end, all_day, category_id, owner_id, created_at, updated_at)
             VALUES
-            (#{title}, #{description}, #{start}, #{end}, #{allDay}, #{categoryId}, #{ownerId}, NOW(), NOW())
+            (#{title}, #{description}, #{start}, #{end}, #{allDay}, #{categoryId}, #{owner_id}, NOW(), NOW())
             """)
     void addEvent(CalendarEvent event);
 
@@ -70,7 +70,7 @@ public interface CalendarEventsDao {
 				LEFT JOIN categories c ON e.category_id = c.id
     			LEFT JOIN member m ON e.owner_id = m.id
 				WHERE (e.owner_id = #{loginedMemberId} OR e.id IN (
-				    SELECT event_id
+				    SELECT eventId
 				    FROM event_shares
 				    WHERE shared_with_user_id = #{loginedMemberId}
 				))
@@ -80,10 +80,10 @@ public interface CalendarEventsDao {
 
     // 이벤트 공유 추가
     @Insert("""
-    		INSERT INTO event_shares (event_id, shared_user_id, permission)
-    			VALUES (#{eventId}, #{sharedUserId}, #{permission})
+    		INSERT INTO event_shares (eventId, shared_with_user_id, shared_whith_user_name, permission)
+    			VALUES (#{eventId}, #{shared_with_user_id}, #{shared_whith_user_name}, #{permission})
     		""")
-	void addShare(@Param("eventId") int eventId, @Param("sharedUserId") int sharedUserId, @Param("permission") String permission);
+	void addShare(@Param("eventId") int[] eventId, @Param("shared_with_user_id") int shared_with_user_id, @Param("shared_whith_user_name") String shared_whith_user_name, @Param("permission") String permission);
     
     // 일정 공유 조회
     @Select("""

@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.demo.dto.CalendarEvent;
 import com.example.demo.dto.Rq;
-import com.example.demo.dto.ShareEventRequest;
 import com.example.demo.service.CalendarEventsService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -81,12 +79,6 @@ public class UsrCalendarEventController {
     	int loginedMemberId = rq.getLoginedMemberId();
     	
         return calendarEventsService.searchEvents(loginedMemberId, start, end);
-    }
-    
-    @PostMapping("/share")
-    public ResponseEntity<String> shareEvent(@RequestBody ShareEventRequest request) {
-        calendarEventsService.shareEvent(request);
-        return ResponseEntity.ok("이벤트가 성공적으로 공유되었습니다.");
     }
 }
 

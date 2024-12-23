@@ -28,9 +28,9 @@
         const stompClient = StompJs.Stomp.over(() => socket); // 팩토리 함수로 전달	
 
         stompClient.connect({}, function () {
-            console.log("WebSocket Connected");
+            console.log("WebSocket 연결 성공");
         }, function (error) {
-            console.error("WebSocket Connection Failed:", error);
+            console.error("WebSocket 연결 실패:", error);
         });
 
         // WebSocket 공유 함수
@@ -42,8 +42,8 @@
 
             const shareData = {
                 action: "share",
-                eventIds: eventIds, // 이벤트ID
-                sharedWith: shareUser, // 유저
+                eventId: eventIds, // 이벤트ID
+                shared_whith_user_name: shareUser, // 유저
                 permission: permission, // 권한 정보 추가
             };
 
@@ -52,7 +52,7 @@
                 {},
                 JSON.stringify(shareData)
             );
-
+			console.log(shareData);
             alert(`선택된 일정이 \${shareUser}에게 공유되었습니다. (권한: \${permission})`);
         }
  
@@ -144,7 +144,7 @@
 					const events = data.map(event => ({
 						id: event.id, // 아이디 필드
 						owner: event.owner || "알 수 없음",
-						ownerId: event.ownerId || "알 수 없음",
+						ownerId: event.owner_id || "알 수 없음",
 						title: event.title || "제목 없음", // 제목 기본값 설정
 						start: event.start,
 	                    end: event.end || null, // 종료 시간 없는 경우 처리
@@ -332,7 +332,7 @@
 	        // 폼 데이터 확인
 	        const newEvent = {
 	            title: $("#add-event-title").val(),
-	            ownerId: $("#add-event-ownerId").val(),
+	            owner_id: $("#add-event-ownerId").val(),
 	            start: $("#add-event-start").val(),
 	            end: $("#add-event-end").val() || $("#add-event-start").val(),
 	            description: $("#add-event-description").val(),
@@ -454,19 +454,22 @@
     }
     
     // 공유 폼 제출 처리
-    document.getElementById("share-event-form").addEventListener("submit", function (e) {
-        e.preventDefault(); // 기본 폼 제출 방지
-        // 폼 데이터 수집
-        const eventIds = document.getElementById("share-event-ids").value.split(",");
-        const shareUser = document.getElementById("share-user").value;
-        const sharePermission = document.getElementById("share-permission").value;
-
-        // WebSocket 공유 함수 호출
-        shareEventsWebSocket(eventIds, shareUser, sharePermission);
-
-        // 모달 닫기
-        closeShareModal();
-    });
+	$(document).ready(function () {
+	    $("#share-event-form").on("submit", function (e) {
+	        e.preventDefault(); // 기본 폼 제출 방지
+	        
+	        // 폼 데이터 수집
+	        const eventIds = $("#share-event-ids").val().split(",");
+	        const shareUser = $("#share-user").val();
+	        const sharePermission = $("#share-permission").val();
+	
+	        // WebSocket 공유 함수 호출
+	        shareEventsWebSocket(eventIds, shareUser, sharePermission);
+	
+	        // 모달 닫기
+	        closeShareModal();
+	    });
+	});
 	
 	// 일정 삭제 함수
 	function deleteEvents(eventIds) {
@@ -654,7 +657,7 @@
 <div id="share-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
     <div class="bg-white w-full max-w-sm p-6 rounded shadow-lg">
         <h3 class="text-lg font-bold mb-4">일정 공유</h3>
-        <form id="share-event-form">
+        <form id="share-event-form" action="">
             <!-- 숨겨진 필드에 선택된 일정 ID 저장 -->
             <input type="hidden" id="share-event-ids" />
             
