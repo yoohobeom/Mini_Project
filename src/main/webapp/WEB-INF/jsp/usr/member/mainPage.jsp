@@ -149,7 +149,7 @@
 						start: event.start,
 	                    end: event.end || null, // 종료 시간 없는 경우 처리
 						allDay: false, // 필요하면 추가
-	                    color: "#3788d8" // 필요하면 색상 추가
+						color: event.ownerId === memberId ? "#3788d8" : "#ffcc00", // 소유자와 공유받은 일정 색상 구분
 					}));
 	                    console.log("Processed Events:", events); // 디버깅용
 	                      successCallback(events);

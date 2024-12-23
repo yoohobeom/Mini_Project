@@ -72,11 +72,11 @@ public interface CalendarEventsDao {
 		    WHERE (e.owner_id = #{loginedMemberId} OR e.id IN (
 		        SELECT es.eventId
 		        FROM event_shares es
-		        WHERE es.shared_with_user_name = #{name}
+		        WHERE es.shared_with_user_name = #{getLoginedMemberName}
 		    ))
 		    AND e.start < #{end} AND e.end > #{start}
             """)
-    List<CalendarEvent> searchEvents(@Param("loginedMemberId") int loginedMemberId, @Param("name") String name, @Param("start") String start, @Param("end") String end);
+    List<CalendarEvent> searchEvents(@Param("loginedMemberId") int loginedMemberId, @Param("getLoginedMemberName") String getLoginedMemberName, @Param("start") String start, @Param("end") String end);
 
     // 이벤트 공유 추가
     @Insert("""
