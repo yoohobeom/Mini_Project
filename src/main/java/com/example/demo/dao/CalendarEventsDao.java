@@ -47,7 +47,7 @@ public interface CalendarEventsDao {
             UPDATE calendar_events
             SET title = #{title}, description = #{description}, start = #{start},
                 end = #{end}, all_day = #{allDay}, category_id = #{categoryId},
-                owner_id = #{ownerId}, updated_at = NOW()
+                owner_id = #{owner_id}, updated_at = NOW()
             WHERE id = #{id}
             """)
     void updateEvent(CalendarEvent event);

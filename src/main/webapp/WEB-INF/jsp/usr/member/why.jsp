@@ -1,26 +1,27 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 
-<html>
+<html lang="ko" data-theme="light">
 <head>
-<!-- fullcalendar -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-<!-- 테일윈드CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- 데이지 UI -->
-<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
-<!-- JQuery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<!-- 폰트어썸 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
-<%@ taglib uri="jakarta.tags.core" prefix="c"%>
-<!-- calendar css -->
-<link rel="stylesheet" href="/resource/calendar.css" />
-<!-- 웹소켓 -->
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client"></script>
-<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
-<title>유저 메인</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- fullcalendar -->
+	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+	<!-- 테일윈드CSS -->
+	<script src="https://cdn.tailwindcss.com"></script>
+	<!-- 데이지 UI -->
+	<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
+	<!-- JQuery -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<!-- 폰트어썸 -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+	<%@ taglib uri="jakarta.tags.core" prefix="c"%>
+	<!-- calendar css -->
+	<link rel="stylesheet" href="/resource/calendar.css" />
+	<!-- 웹소켓 -->
+	<script src="https://cdn.jsdelivr.net/npm/sockjs-client"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+	<title>유저 메인</title>
 
 <script>
         // WebSocket 초기화
@@ -126,7 +127,6 @@
 			locale: "ko",
 			headerToolbar: { left: "", center: "prev title next", right: "today" },
 			initialView: "dayGridMonth",
-			height: "500px",
 			selectable: true,
 			editable: true,
 			dayMaxEvents: true,
@@ -434,7 +434,8 @@
             contentType: "application/json",
             data: JSON.stringify(updatedEvent),
             success: function () {
-                console.log(updatedEvent); // 전송 데이터 출력
+                console.log("서버 업데이트 성공:", updatedEvent); // 전송 데이터 출력
+                info.event.setDates(info.event.start, info.event.end); // 캘린더 업데이트
             },
             error: function () {
                 alert("일정을 수정하는 데 실패했습니다.");
@@ -518,74 +519,130 @@
 
 </head>
 
-<body>
-	<div class="h-20 flex container mx-auto text-3xl">
-		<div><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/">로고</a></div>
-		<label class="swap swap-rotate">
-			<!-- this hidden checkbox controls the state -->
-			<input id="swapCheck" type="checkbox" onchange="themeSwap();"/>
-			<!-- sun icon -->
-			<svg
-				class="swap-on h-10 w-10 fill-current"
-				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 24 24">
-				<path
-				d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
-			</svg>
-			<!-- moon icon -->
-			<svg
-				class="swap-off h-10 w-10 fill-current"
-				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 24 24">
-				<path
-				d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
-			</svg>
-		</label>		
-		<div class="grow"></div>
-		<ul class="flex">
-			<c:if test="${rq.getLoginedMemberId() == -1 }">
-				<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/member/join">JOIN</a></li>
-				<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/member/login">LOGIN</a></li>
-			</c:if>
-			<c:if test="${rq.getLoginedMemberId() != -1 }">
-				<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/member/myPage">MYPAGE</a></li>
-				<li class="link link-hover"><a class="h-full px-3 flex items-center" href="${pageContext.request.contextPath}/usr/member/doLogout">LOGOUT</a></li>
-			</c:if>
-		</ul>
-	</div>
-
-<!-- 캘린더 컨테이너 -->
-<div id="calendar-container" class="hidden sm:block p-4 sm:ml-44">
-    <div id="calendar" class="shadow-lg rounded-lg overflow-hidden border border-gray-200"></div>
-</div>
-<!-- 일정 상세 정보 -->
-<div id="schedule-details" class="p-4 sm:ml-44 sm:mr-44 mt-20 bg-white border border-gray-200 shadow-lg rounded-lg">
-    <div class="flex justify-between items-center mb-4">
-        <h3 class="text-2xl font-bold text-gray-700">일정 상세보기</h3>
-        
-        <!-- 버튼 영역 -->
-        <div class="flex flex-wrap gap-2">
-            <button id="create-event" class="btn btn-primary flex items-center">
-                <i class="fas fa-plus mr-2"></i> 생성
-            </button>
-            <button id="edit-event" class="btn btn-secondary flex items-center">
-                <i class="fas fa-edit mr-2"></i> 수정
-            </button>
-            <button id="share-events" class="btn btn-accent flex items-center">
-                <i class="fas fa-share-alt mr-2"></i> 공유
-            </button>
-            <button id="delete-events" class="btn btn-error flex items-center">
-                <i class="fas fa-trash mr-2"></i> 삭제
-            </button>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <header class="bg-white dark:bg-gray-800 shadow-md">
+        <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="${pageContext.request.contextPath}/" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-200">
+                <i class="fas fa-calendar-alt mr-2"></i>캘린더
+            </a>
+            <nav class="flex items-center space-x-4">
+                <label class="swap swap-rotate">
+                    <input id="themeToggle" type="checkbox" />
+                    <i class="fas fa-sun swap-on text-yellow-500 text-2xl"></i>
+                    <i class="fas fa-moon swap-off text-indigo-600 text-2xl"></i>
+                </label>
+                <ul class="flex space-x-4">
+                    <c:if test="${rq.getLoginedMemberId() == -1 }">
+                        <li><a href="${pageContext.request.contextPath}/usr/member/join" class="btn btn-sm btn-outline btn-primary">회원가입</a></li>
+                        <li><a href="${pageContext.request.contextPath}/usr/member/login" class="btn btn-sm btn-primary">로그인</a></li>
+                    </c:if>
+                    <c:if test="${rq.getLoginedMemberId() != -1 }">
+                        <li><a href="${pageContext.request.contextPath}/usr/member/myPage" class="btn btn-sm btn-outline btn-primary">마이페이지</a></li>
+                        <li><a href="${pageContext.request.contextPath}/usr/member/doLogout" class="btn btn-sm btn-primary">로그아웃</a></li>
+                    </c:if>
+                </ul>
+            </nav>
         </div>
-    </div>
+    </header>
 
-    <!-- 일정 내용 -->
-    <div id="schedule-content" class="bg-gray-50 p-6 rounded-lg shadow-inner">
-        <p class="text-center text-gray-500">날짜를 선택하여 일정을 확인하세요.</p>
-    </div>
-</div>
+    <main class="container mx-auto p-4 mt-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+			<!-- 캘린더 컨테이너 -->
+            <div class="lg:w-2/3">
+                <div id="calendar" class="bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-2xl"></div>
+            </div>
 
+			<!-- 일정 상세 정보 -->
+            <div class="lg:w-1/3">
+                <div id="schedule-details" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl transition-shadow duration-300 hover:shadow-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">일정 상세보기</h3>
+                    </div>
+                    
+					<!-- 버튼 영역 -->
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button id="create-event" class="btn btn-primary btn-sm"><i class="fas fa-plus mr-2"></i>생성</button>
+                        <button id="edit-event" class="btn btn-secondary btn-sm"><i class="fas fa-edit mr-2"></i>수정</button>
+                        <button id="share-events" class="btn btn-accent btn-sm"><i class="fas fa-share-alt mr-2"></i>공유</button>
+                        <button id="delete-events" class="btn btn-error btn-sm"><i class="fas fa-trash-alt mr-2"></i>삭제</button>
+                    </div>
+
+					<!-- 일정 내용 -->
+                    <div id="schedule-content" class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                        <p class="text-center text-gray-600 dark:text-gray-300"><i class="fas fa-info-circle mr-2"></i>날짜를 선택하여 일정을 확인하세요.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+		<!-- 게시글 리스트 -->
+        <section class="mt-12">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 transition-shadow duration-300 hover:shadow-2xl">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white"><i class="fas fa-list-alt mr-2"></i>게시글 목록</h2>
+                <div class="flex justify-between items-center mb-6">
+                    <c:if test="${rq.getLoginedMemberId() != -1 }">
+                        <a href="../article/write" class="btn btn-primary btn-sm"><i class="fas fa-pen mr-2"></i>글쓰기</a>
+                    </c:if>
+                    <form class="flex items-center space-x-2">
+                        <select class="select select-bordered select-sm" name="searchType">
+                            <option value="title" <c:if test="${searchType == 'title'}">selected</c:if>>제목</option>
+                            <option value="body" <c:if test="${searchType == 'body'}">selected</c:if>>내용</option>
+                            <option value="title,body" <c:if test="${searchType == 'title,body'}">selected</c:if>>제목 + 내용</option>
+                        </select>
+                        <input type="text" class="input input-bordered input-sm" name="searchKeyword" placeholder="검색어" maxlength="25" value="${searchKeyword}" />
+                        <button class="btn btn-primary btn-sm"><i class="fas fa-search mr-2"></i>검색</button>
+                    </form>
+                </div>
+
+                <!-- 테이블: 큰 화면 -->
+                <div class="hidden sm:block overflow-x-auto">
+                    <table class="table w-full">
+                        <thead>
+                            <tr>
+                                <th class="bg-gray-100 dark:bg-gray-700">번호</th>
+                                <th class="bg-gray-100 dark:bg-gray-700">제목</th>
+                                <th class="bg-gray-100 dark:bg-gray-700">작성자</th>
+                                <th class="bg-gray-100 dark:bg-gray-700">작성일</th>
+                                <th class="bg-gray-100 dark:bg-gray-700">조회수</th>
+                                <th class="bg-gray-100 dark:bg-gray-700">추천수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="article" items="${articles}">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                    <td>${article.id}</td>
+                                    <td><a href="../article/detail?id=${article.id}" class="link link-hover text-primary">${article.title}</a></td>
+                                    <td>${article.loginId}</td>
+                                    <td>${article.regDate.substring(0, 10)}</td>
+                                    <td><i class="fas fa-eye mr-1"></i>${article.views}</td>
+                                    <td><i class="fas fa-thumbs-up mr-1"></i>${article.like}</td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 카드: 작은 화면 -->
+                <div class="sm:hidden space-y-4">
+                    <c:forEach var="article" items="${articles}">
+                        <div class="card bg-base-100 shadow-md transition-transform duration-300 hover:scale-105">
+                            <div class="card-body">
+                                <h2 class="card-title">
+                                    <a href="../article/detail?id=${article.id}" class="link link-hover text-primary">${article.title}</a>
+                                </h2>
+                                <p><i class="fas fa-user mr-1"></i>작성자: ${article.loginId}</p>
+                                <p><i class="fas fa-calendar-alt mr-1"></i>작성일: ${article.regDate.substring(0, 10)}</p>
+                                <p>
+                                    <i class="fas fa-eye mr-1"></i>조회수: ${article.views} 
+                                    <i class="fas fa-thumbs-up ml-2 mr-1"></i>추천수: ${article.like}
+                                </p>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </div>
+            </div>
+        </section>
+    </main>
 <!-- 상세 정보 모달 -->
 <div id="event-detail-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
     <div class="bg-white w-80 md:w-96 p-6 rounded-lg shadow-lg">
@@ -677,71 +734,11 @@
     </div>
 </div>
 
-<!-- 게시글 리스트 -->
-<section class="mt-8">
-    <div class="container mx-auto">
-    	<h1>게시글 목록</h1>
-        <div class="w-full mb-4 pl-3 text-sm flex justify-between items-end">
-            
-            <c:if test="${rq.getLoginedMemberId() != -1 }">
-			<div class="w-9/12 flex justify-end mr-2">
-				<a class="btn btn-active btn-sm" href="../article/write">글쓰기</a>
-			</div>
-			</c:if>
-            <form class="flex items-center">
-                <select class="select select-bordered select-sm mr-2" name="searchType">
-                    <option value="title" <c:if test="${searchType == 'title'}">selected</c:if>>제목</option>
-                    <option value="body" <c:if test="${searchType == 'body'}">selected</c:if>>내용</option>
-                    <option value="title,body" <c:if test="${searchType == 'title,body'}">selected</c:if>>제목 + 내용</option>
-                </select>
-                <input type="text" class="input input-bordered input-sm w-60" name="searchKeyword" placeholder="검색어" maxlength="25" value="${searchKeyword}" />
-                <button class="btn btn-primary btn-sm ml-2">검색</button>
-            </form>
-        </div>
-
-        <!-- 테이블: 큰 화면 -->
-        <div class="hidden sm:block w-full overflow-x-auto">
-            <table class="table table-lg">
-                <thead>
-                    <tr>
-                        <th>번호</th>
-                        <th>제목</th>
-                        <th>작성자</th>
-                        <th>작성일</th>
-                        <th>조회수</th>
-                        <th>추천수</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:forEach var="article" items="${articles}">
-                        <tr>
-                            <td>${article.id}</td>
-                            <td><a href="../article/detail?id=${article.id}">${article.title}</a></td>
-                            <td>${article.loginId}</td>
-                            <td>${article.regDate.substring(0, 10)}</td>
-                            <td>${article.views}</td>
-                            <td>${article.like}</td>
-                        </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- 카드: 작은 화면 -->
-        <div class="sm:hidden">
-            <c:forEach var="article" items="${articles}">
-                <div class="border border-gray-300 rounded p-4 mb-2 bg-white shadow">
-                    <h4 class="font-bold mb-2">
-                        <a href="detail?id=${article.id}" class="text-blue-600">${article.title}</a>
-                    </h4>
-                    <p>작성자: ${article.loginId}</p>
-                    <p>작성일: ${article.regDate.substring(0, 10)}</p>
-                    <p>조회수: ${article.views} | 추천수: ${article.like}</p>
-                </div>
-            </c:forEach>
-        </div>
-    </div>
-</section>
-
 </body>
+<script>
+// 테마 토글 기능
+$('#themeToggle').change(function() {
+    $('html').attr('data-theme', this.checked ? 'dark' : 'light');
+});
+</script>
 </html>

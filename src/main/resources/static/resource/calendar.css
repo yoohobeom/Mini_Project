@@ -1,94 +1,27 @@
-@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
-.fc-day-sun .fc-col-header-cell-cushion {
-	color: red;
-}
-
-.fc-day-sat .fc-col-header-cell-cushion {
-	color: blue;
-}
-	    	
-.fc-daygrid-day .fc-daygrid-day-number {	/* 일요일, 토요일 제외 */
-	color: black;
-}
-	    	
-.fc-daygrid-day.fc-day-sun .fc-daygrid-day-number{ 		
-	color: red;
+body {
+	font-family: 'Noto Sans KR', sans-serif;
 }
 
-.fc-daygrid-day.fc-day-sat .fc-daygrid-day-number{		
-	color: blue;
+.fc-theme-standard td, .fc-theme-standard th {
+	border-color: #e2e8f0;
 }
 
-.fc-toolbar-chunk {
-    display: flex;       /* 툴바의 요소들을 일렬로 나란히 배치 */
-    align-items: center; /* 수직 가운데 정렬 */
-    justify-content: flex-start; /* 왼쪽 정렬 */
+.fc .fc-daygrid-day-number {
+	color: #4a5568;
 }
 
-#calendar-container {
-	max-width: 100%; /* 부모 요소 너비를 초과하지 않도록 제한 */
+.fc .fc-col-header-cell-cushion {
+	color: #2d3748;
 }
 
-#calendar {
-	width: 100% !important; /* 캘린더의 너비를 100%로 강제 설정 */
-	height: 63vh !important; /* 캘린더의 너비를 100%로 강제 설정 */
-    max-width: 600px !important; /* 최대 너비를 800px로 강제 설정 */
+.transition-transform {
+	transition-property: transform;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 150ms;
 }
 
-#schedule-details {
-	position: absolute;
-	top: 0;
-	right: 0;
-	width: 100%;
-	max-width: 900px;
-	height: 65vh;
-	overflow-y: auto;
-	border-left: 1px solid #ccc;
-/* 	background-color: #f9f9f9; */
-}
-
-/* FullCalendar 이벤트 컨테이너 스타일 */
-.fc-event {
-    display: flex;
-    align-items: center;
-    background-color: #f0f4f8; /* 배경 색상 (연한 회색) */
-    border: 1px solid #e5e7eb; /* 테두리 */
-    border-radius: 8px; /* 둥근 모서리 */
-    padding: 4px 8px; /* 여백 */
-    color: #333; /* 글자 색상 */
-    font-size: 0.9rem; /* 글자 크기 */
-    font-weight: 500; /* 글자 두께 */
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.fc-event:hover {
-    transform: translateY(-2px); /* 마우스 오버 시 살짝 위로 */
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
-}
-
-/* 시간 부분 (왼쪽에 고정된 위치) */
-.fc-event-time {
-    font-weight: bold;
-    margin-right: 8px; /* 시간과 제목 사이 여백 */
-    color: #2563eb; /* 파란색 강조 */
-}
-
-/* 이벤트 제목 스타일 */
-.fc-event-title {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* 긴 제목은 "..."으로 생략 */
-    flex: 1; /* 제목이 남는 공간을 차지 */
-}
-
-/* 이벤트 색상 강조 */
-.fc-event::before {
-    content: '';
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    background-color: #2563eb; /* 강조 색상 */
-    border-radius: 50%; /* 동그란 모양 */
-    margin-right: 8px;
+.hover\:scale-105:hover {
+	transform: scale(1.05);
 }
