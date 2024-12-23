@@ -74,9 +74,9 @@ CREATE TABLE `event_recurrence` (
 
 CREATE TABLE `event_shares` (
     `id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    `event_id` INT UNSIGNED NOT NULL, -- 이벤트 참조
+    `eventId` INT UNSIGNED NOT NULL, -- 이벤트 참조
     `shared_with_user_id` INT UNSIGNED, -- 사용자 참조
-    `shared_with_group_id` INT UNSIGNED, -- 그룹 참조
+    `shared_whith_user_name` VARCHAR(100), -- 그룹 참조
     `permission` ENUM('view', 'edit') DEFAULT 'view'
 );
 
