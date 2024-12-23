@@ -141,6 +141,7 @@
 		function fetchEvents(info, successCallback, failureCallback) {
 			$.get("/api/events/search", { start: info.startStr, end: info.endStr })
 				.done(data => {
+					console.log(data);
 					const events = data.map(event => ({
 						id: event.id, // 아이디 필드
 						owner: event.owner || "알 수 없음",
@@ -151,8 +152,8 @@
 						allDay: false, // 필요하면 추가
 						color: event.ownerId === memberId ? "#3788d8" : "#ffcc00", // 소유자와 공유받은 일정 색상 구분
 					}));
-	                    console.log("Processed Events:", events); // 디버깅용
-	                      successCallback(events);
+                    console.log("Processed Events:", events); // 디버깅용
+                    successCallback(events);
 				})
 				.fail(() => {
 					alert("이벤트를 가져오는 데 실패했습니다.");

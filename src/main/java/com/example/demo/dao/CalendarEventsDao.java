@@ -72,19 +72,12 @@ public interface CalendarEventsDao {
 		    WHERE (e.owner_id = #{loginedMemberId} OR e.id IN (
 		        SELECT es.eventId
 		        FROM event_shares es
-		        WHERE es.shared_with_user_name = #{getLoginedMemberName}
+		        WHERE es.shared_with_user_name = #{loginedMemberName}
 		    ))
 		    AND e.start < #{end} AND e.end > #{start}
             """)
-    List<CalendarEvent> searchEvents(@Param("loginedMemberId") int loginedMemberId, @Param("getLoginedMemberName") String getLoginedMemberName, @Param("start") String start, @Param("end") String end);
+    List<CalendarEvent> searchEvents(@Param("loginedMemberId") int loginedMemberId, @Param("loginedMemberName") String loginedMemberName, @Param("start") String start, @Param("end") String end);
 
-    // 이벤트 공유 추가
-    @Insert("""
-    		INSERT INTO event_shares (eventId, shared_with_user_id, shared_whith_user_name, permission)
-    			VALUES (#{eventId}, #{shared_with_user_id}, #{shared_whith_user_name}, #{permission})
-    		""")
-	void addShare(@Param("eventId") int[] eventId, @Param("shared_with_user_id") int shared_with_user_id, @Param("shared_whith_user_name") String shared_whith_user_name, @Param("permission") String permission);
-    
     // 일정 공유 조회
     @Select("""
     		SELECT permission

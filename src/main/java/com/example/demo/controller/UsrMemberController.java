@@ -127,7 +127,7 @@ public class UsrMemberController {
 			return Util.jsReturn("비밀번호를 확인해주세요", null);
 		}
 		
-		rq.login(member.getId(),"");
+		rq.login(member.getId(),member.getName());
 		
 		return Util.jsReturn(String.format("%s님 환영합니다", member.getName()), "/usr/member/mainPage");
 	}

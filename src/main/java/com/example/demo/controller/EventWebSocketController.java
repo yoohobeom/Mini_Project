@@ -23,6 +23,7 @@ public class EventWebSocketController {
 	@SendTo("/topic/events") // 메시지를 구독한 클라이언트로 전송
 	public List<CalendarEvent> handleShareEvent(ShareEventRequest request) {
 		
+		System.out.println(request);
 	    // 요청 데이터를 서비스 계층에 전달하여 처리
 	    calendarEventsService.shareEvent(request);
 

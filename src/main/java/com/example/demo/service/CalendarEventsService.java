@@ -62,8 +62,13 @@ public class CalendarEventsService {
     }
 
     // 특정 날짜 범위로 이벤트 검색
-    public List<CalendarEvent> searchEvents(int loginedMemberId, String name, String start, String end) {
-        return calendarEventsDao.searchEvents(loginedMemberId, name, start, end);
+    public List<CalendarEvent> searchEvents(int loginedMemberId, String loginedMemberName, String start, String end) {
+        System.out.println("Before DAO call:");
+        System.out.println("loginedMemberId: " + loginedMemberId);
+        System.out.println("loginedMemberName: " + loginedMemberName);
+        System.out.println("start: " + start);
+        System.out.println("end: " + end);
+        return calendarEventsDao.searchEvents(loginedMemberId, loginedMemberName, start, end);
     }
     
     // 공유 처리 로직
