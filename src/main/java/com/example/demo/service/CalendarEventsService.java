@@ -62,17 +62,18 @@ public class CalendarEventsService {
     }
 
     // 특정 날짜 범위로 이벤트 검색
-    public List<CalendarEvent> searchEvents(int loginedMemberId, String start, String end) {
-        return calendarEventsDao.searchEvents(loginedMemberId, start, end);
+    public List<CalendarEvent> searchEvents(int loginedMemberId, String name, String start, String end) {
+        return calendarEventsDao.searchEvents(loginedMemberId, name, start, end);
     }
     
     // 공유 처리 로직
     public void shareEvent(ShareEventRequest request) {
         for (int eventId : request.getEventId()) {
+        	
             // 각 이벤트에 대해 공유 처리
             EventShare share = new EventShare();
             share.setEventId(eventId);
-            share.setShared_whith_user_name(request.getShared_whith_user_name());
+            share.setShared_with_user_name(request.getShared_with_user_name());
             share.setPermission(request.getPermission());
             
             // 데이터베이스에 저장
@@ -116,8 +117,4 @@ public class CalendarEventsService {
         calendarEventsDao.deleteShareEvent(eventId);
     }
 
-    // 이벤트 조회 로직 (권한 포함)
-    public List<CalendarEvent> getEventsWithPermission(int userId, String start, String end) {
-        return calendarEventsDao.searchEvents(userId, start, end);
-    }
 }

@@ -22,6 +22,7 @@ public class EventWebSocketController {
 	@MessageMapping("/share-event") // 클라이언트가 보낼 메시지 경로
 	@SendTo("/topic/events") // 메시지를 구독한 클라이언트로 전송
 	public List<CalendarEvent> handleShareEvent(ShareEventRequest request) {
+		
 	    // 요청 데이터를 서비스 계층에 전달하여 처리
 	    calendarEventsService.shareEvent(request);
 

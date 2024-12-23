@@ -65,18 +65,18 @@ public interface CalendarEventsDao {
 
     // 특정 날짜 범위의 이벤트 검색
     @Select("""
-			SELECT e.*, c.name AS category_name, m.name AS owner
-				FROM calendar_events e
-				LEFT JOIN categories c ON e.category_id = c.id
-    			LEFT JOIN member m ON e.owner_id = m.id
-				WHERE (e.owner_id = #{loginedMemberId} OR e.id IN (
-				    SELECT eventId
-				    FROM event_shares
-				    WHERE shared_with_user_id = #{loginedMemberId}
-				))
-				AND e.start < #{end} AND e.end > #{start};
+		    SELECT e.*, c.name AS category_name, m.name AS owner
+		    FROM calendar_events e
+		    LEFT JOIN categories c ON e.category_id = c.id
+		    LEFT JOIN member m ON e.owner_id = m.id
+		    WHERE (e.owner_id = #{loginedMemberId} OR e.id IN (
+		        SELECT es.eventId
+		        FROM event_shares es
+		        WHERE es.shared_with_user_name = #{name}
+		    ))
+		    AND e.start < #{end} AND e.end > #{start}
             """)
-    List<CalendarEvent> searchEvents(int loginedMemberId, @Param("start") String start, @Param("end") String end);
+    List<CalendarEvent> searchEvents(@Param("loginedMemberId") int loginedMemberId, @Param("name") String name, @Param("start") String start, @Param("end") String end);
 
     // 이벤트 공유 추가
     @Insert("""

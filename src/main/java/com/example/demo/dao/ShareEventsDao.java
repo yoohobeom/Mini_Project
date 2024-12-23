@@ -12,8 +12,8 @@ import com.example.demo.dto.EventShare;
 public interface ShareEventsDao {
     // 이벤트 공유 추가
     @Insert("""
-    		INSERT INTO event_shares (eventId, shared_whith_user_name, permission)
-    			VALUES (#{eventId}, #{shared_whith_user_name}, #{permission})
+    		INSERT INTO event_shares (eventId, shared_with_user_name, permission)
+    			VALUES (#{eventId}, #{shared_with_user_name}, #{permission})
     		""")
 	void addShare(EventShare share);
     

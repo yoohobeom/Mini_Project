@@ -66,19 +66,24 @@ public class UsrCalendarEventController {
     	return "Event deleted successfully";
     }
 
-    // 특정 날짜 범위로 이벤트 검색
     @GetMapping("/search")
     @ResponseBody
+    // 특정 날짜 범위로 이벤트 검색
     public List<CalendarEvent> searchEvents(
             @RequestParam String start,
-            @RequestParam String end, 
+            @RequestParam String end,
+            @RequestParam(required = false) String name, // 선택적 파라미터
             HttpServletRequest req) {
-    	
-    	Rq rq = (Rq) req.getAttribute("rq");
-    	
-    	int loginedMemberId = rq.getLoginedMemberId();
-    	
-        return calendarEventsService.searchEvents(loginedMemberId, start, end);
+        
+        Rq rq = (Rq) req.getAttribute("rq");
+        int loginedMemberId = rq.getLoginedMemberId();
+
+        // name이 null이면 로그인된 사용자의 이름 사용
+        if (name == null || name.isBlank()) {
+            name = rq.getLoginedMemberName(); // 로그인된 사용자의 이름 가져오기
+        }
+
+        return calendarEventsService.searchEvents(loginedMemberId, name, start, end);
     }
 }
 

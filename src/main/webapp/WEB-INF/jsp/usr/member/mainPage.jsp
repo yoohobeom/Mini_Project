@@ -43,7 +43,7 @@
             const shareData = {
                 action: "share",
                 eventId: eventIds, // 이벤트ID
-                shared_whith_user_name: shareUser, // 유저
+                shared_with_user_name: shareUser, // 유저
                 permission: permission, // 권한 정보 추가
             };
 

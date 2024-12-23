@@ -14,12 +14,17 @@ public class Rq {
 	@Getter
 	private int loginedMemberId;
 	
+	@Getter
+	private String loginedMemberName;
+	
 	private HttpServletResponse resp;
 	private HttpSession session;
+
 	
 	public Rq(HttpServletRequest req, HttpServletResponse resp) {
 		this.session = req.getSession();
 		
+		// 로그인된 사용사 id 가져오기
 		int loginedMemberId = -1;
 		
 		if (this.session.getAttribute("loginedMemberId") != null) {
@@ -27,8 +32,20 @@ public class Rq {
 		}
 		
 		this.loginedMemberId = loginedMemberId;
+		
+        // 로그인된 사용자 이름 가져오기
+        String loginedMemberName = null;
+        
+        if (this.session.getAttribute("loginedMemberName") != null) {
+        	loginedMemberName = (String) this.session.getAttribute("loginedMemberName");
+        }
+        
+        this.loginedMemberName = loginedMemberName;
+		
 		this.resp = resp;
 	}
+	
+	
 
 	public void jsPrintReplace(String msg, String uri) {
 		resp.setContentType("text/html; charset=UTF-8;");
@@ -40,11 +57,13 @@ public class Rq {
 		}
 	}
 
-	public void login(int loginedMemberId) {
+	public void login(int loginedMemberId, String loginedMemberName) {
 		this.session.setAttribute("loginedMemberId", loginedMemberId);
+		this.session.setAttribute("loginedMemberName", loginedMemberName);
 	}
 
 	public void logout() {
 		this.session.removeAttribute("loginedMemberId");
+		this.session.removeAttribute("loginedMemberName");
 	}
 }
