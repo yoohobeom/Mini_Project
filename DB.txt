@@ -20,7 +20,7 @@ CREATE TABLE `member`(
 	, updateDate DATETIME NOT NULL
 	, loginId VARCHAR(100) NOT NULL
 	, loginPw VARCHAR(100) NOT NULL
-	, `name` VARCHAR(20) NOT NULL
+	, `name` VARCHAR(20) NOT NULL UNIQUE
 	, `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -75,7 +75,6 @@ CREATE TABLE `event_recurrence` (
 CREATE TABLE `event_shares` (
     `id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     `eventId` INT UNSIGNED NOT NULL, -- 이벤트 참조
-    `shared_with_user_id` INT UNSIGNED, -- 사용자 참조
     `shared_whith_user_name` VARCHAR(100), -- 그룹 참조
     `permission` ENUM('view', 'edit') DEFAULT 'view'
 );

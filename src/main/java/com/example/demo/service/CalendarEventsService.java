@@ -72,7 +72,6 @@ public class CalendarEventsService {
             // 각 이벤트에 대해 공유 처리
             EventShare share = new EventShare();
             share.setEventId(eventId);
-            share.setShared_with_user_id(request.getShared_with_user_id());
             share.setShared_whith_user_name(request.getShared_whith_user_name());
             share.setPermission(request.getPermission());
             
