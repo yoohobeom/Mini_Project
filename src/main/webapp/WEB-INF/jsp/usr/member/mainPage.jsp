@@ -92,7 +92,8 @@
 	                return;
 	            }
 	            const eventId = selectedIds[0];
-	            openEditEventModal(eventId);
+	            const userId = `\${memberId}`;
+	            openEditEventModal(eventId, userId);
 	        }
 
 	        // 일정 삭제 버튼
@@ -126,7 +127,6 @@
 			locale: "ko",
 			headerToolbar: { left: "", center: "prev title next", right: "today" },
 			initialView: "dayGridMonth",
-			height: "500px",
 			selectable: true,
 			editable: true,
 			dayMaxEvents: true,
@@ -181,7 +181,9 @@
 	    	const event = info.event;
 	    	const details = document.getElementById("schedule-details");
 	    	const content = document.getElementById("schedule-content");
-	
+			console.log(info.startStr);
+			console.log(info.endStr);
+			console.log(memberId);
 	   		// AJAX 요청으로 해당 날짜의 일정 가져오기
 	    	$.ajax({
 	        	url: "/api/events/search",
@@ -359,7 +361,7 @@
 
 	// 일정 수정
 	// 모달 열기
-	function openEditEventModal(eventId) {
+	function openEditEventModal(eventId, ownerId) {
 		
 	    $.ajax({
 	        url: "/api/events/id", // 일정 상세 조회 API
@@ -393,6 +395,7 @@
 	            start: $("#edit-event-start").val(),
 	            end: $("#edit-event-end").val(),
 	            description: $("#edit-event-description").val(),
+	            owner_id: val(owner_id),
 	        };
 
 	        $.ajax({
@@ -419,14 +422,13 @@
 
 	// 이벤트 Drag&Drop방식 수정
     function handleEventDrop(info) {
-		
         const updatedEvent = {
             id: info.event.id,
             title: info.event.title, // 제목 유지
             start: formatDateForMysql(info.event.start), // 새로운 시작 시간
             end: formatDateForMysql(info.event.end), // 새로운 종료 시간
         };
-        
+        console.log("업데이트 요청데이터:", updatedEvent);
         // AJAX로 서버에 변경된 이벤트 정보 전송
         $.ajax({
             url: "/api/events/update",
@@ -434,7 +436,7 @@
             contentType: "application/json",
             data: JSON.stringify(updatedEvent),
             success: function () {
-                console.log(updatedEvent); // 전송 데이터 출력
+                console.log("업데이트 성공", updatedEvent); // 전송 데이터 출력
             },
             error: function () {
                 alert("일정을 수정하는 데 실패했습니다.");

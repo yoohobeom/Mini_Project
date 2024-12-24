@@ -103,7 +103,7 @@ public class UsrMemberController {
 	    model.addAttribute("searchKeyword", searchKeyword);
 		model.addAttribute("loginedMemberName", loginedMemberName);
 	    
-		return "usr/member/mainPage";
+		return "usr/member/why";
 	}
 	
 	@GetMapping("/usr/member/login")

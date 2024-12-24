@@ -125,7 +125,7 @@
 	function initCalendar() {
 		const calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
 			locale: "ko",
-			headerToolbar: { left: "", center: "prev title next", right: "today" },
+			headerToolbar: { left: "prev,next", center: "title", right: "today" },
 			initialView: "dayGridMonth",
 			selectable: true,
 			editable: true,

@@ -51,7 +51,28 @@ public class UsrCalendarEventController {
     @PostMapping("/update")
     @ResponseBody
     public String updateEvent(@RequestBody CalendarEvent event) {
-        calendarEventsService.updateEvent(event);
+    	
+        // 기존 데이터를 데이터베이스에서 조회
+        CalendarEvent existingEvent = calendarEventsService.getEventById(event.getId());
+
+        if (existingEvent == null) {
+            return "해당 이벤트를 찾을 수 없습니다.";
+        }
+
+        // 새로 전달된 값으로 기존 값을 덮어쓰기
+        if (event.getTitle() != null) {
+            existingEvent.setTitle(event.getTitle());
+        }
+        if (event.getStart() != null) {
+            existingEvent.setStart(event.getStart());
+        }
+        if (event.getEnd() != null) {
+            existingEvent.setEnd(event.getEnd());
+        }
+
+        // 업데이트 수행
+        calendarEventsService.updateEvent(existingEvent);
+    	
         return "Event updated successfully";
     }
 

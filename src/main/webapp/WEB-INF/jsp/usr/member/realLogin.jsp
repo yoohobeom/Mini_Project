@@ -112,7 +112,7 @@
 			</label>
         </h2>
         
-        <form class="space-y-4" action="doLogin" method="post" onsubmit="loginForm_onSubmit(this); return false;">
+        <form class="space-y-4" action="../home/doLogin" method="post" onsubmit="loginForm_onSubmit(this); return false;">
             <div class="form-control">
                 <label class="label">
                     <span class="label-text">아이디</span>
